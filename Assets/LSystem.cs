@@ -16,14 +16,16 @@ public class LSystem : MonoBehaviour
     public Text axiom;
     public Text rulesText;
     public Text alphabetText;
+    string initialAxiom;
 
     string alphabet = "";
     public string nextAxiom;
     int n = 0;
     void Start()
     {
-        InitTexts();
         InitRules();
+        InitTexts();
+        initialAxiom = axiom.text;
     }
 
     void InitRules()
@@ -67,15 +69,34 @@ public class LSystem : MonoBehaviour
 
     public void StepForward()
     {
+        if (n == 0)
+        {
+            InitRules();
+            InitTexts();
+        }
         n++;
         IterateAxiom();
     }
     public void StepBack()
     {
-        if (n > 0)
-            n--;
-    }
+        int step = n - 1;
+        n = 0;
+        startingAxiom = initialAxiom;
+        if (step != 0)
+        {
+            while (n < step)
+            {
+                StepForward();
 
+            }
+        }
+        else
+        {
+            axiom.text = startingAxiom;
+        }
+
+
+    }
     void IterateAxiom()
     {
         nextAxiom = "";

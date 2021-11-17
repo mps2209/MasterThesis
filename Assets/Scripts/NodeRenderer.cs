@@ -2,11 +2,13 @@ using Assets.Scripts;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System.Linq;
 public class NodeRenderer : MonoBehaviour
 {
     // Start is called before the first frame update
     Dictionary<string, LineRenderer> renderedBranches = new Dictionary<string, LineRenderer>();
+    Dictionary<char, Color> branchColors = new Dictionary<char, Color>();
+
     LSystem lSystem;
     NodeSystem nodeSystem;
     public Material branchMaterial;
@@ -15,7 +17,8 @@ public class NodeRenderer : MonoBehaviour
     public Color nodeInactive;
 
     public float branchThickness;
-    Dictionary<char, int> renderedNodes = new Dictionary<char, int>();
+    Dictionary<char, List<int>> renderedNodes = new Dictionary<char, List<int>>();
+    public List<Vector3> savedPositions = new List<Vector3>();
     void Start()
     {
         lSystem = GameObject.Find("LSystemController").GetComponent<LSystem>();
@@ -31,52 +34,92 @@ public class NodeRenderer : MonoBehaviour
     public void RenderLSystem()
     {
         DestroyPreviousSystem();
-        
         string renderAxiom = lSystem.axiom.text;
-        Debug.Log("Rendering: " + renderAxiom);
-        int l = 0;
-        while (l < renderAxiom.Length)
+        int axiomIterator = 0;
+        char previousLetter = '0';
+        int letterCounter = 0;
+        while (axiomIterator < renderAxiom.Length)
         {
-            if (renderAxiom[l] != 'B')
+            char currentLetter = renderAxiom[axiomIterator];
+
+            if (renderedNodes.ContainsKey(currentLetter)){
+                int previousCount= renderedNodes[currentLetter].Last();
+                previousCount++;
+                renderedNodes[currentLetter].Remove(renderedNodes[currentLetter].Last());
+                renderedNodes[currentLetter].Add(previousCount);
+            }
+            else
+            {
+                renderedNodes[currentLetter] = new List<int>();
+                renderedNodes[currentLetter].Add(0);
+                if (!branchColors.ContainsKey(currentLetter))
+                {
+                    branchColors[currentLetter] = Random.ColorHSV();
+
+                }
+            }
+            previousLetter = currentLetter;
+            List<char> keys = renderedNodes.Keys.ToList();
+
+            switch (currentLetter)
             {
 
+                case '[':
+                    savedPositions.Add(savedPositions.Last());
+                    foreach(char key in keys)
+                    {
+                        renderedNodes[key].Add(0);
+                    }
 
-                if (!renderedNodes.ContainsKey(renderAxiom[l]))
-                {
-                    renderedNodes[renderAxiom[l]] = 0;
-                }
-                else
-                {
-                    renderedNodes[renderAxiom[l]]++;
-                }
-                string nodeLetter = renderAxiom[l].ToString();
-                renderNode(nodeLetter, renderedNodes[renderAxiom[l]]);
-
+                    break;
+                case ']':
+                    foreach (char key in keys)
+                    {
+                        renderedNodes[key].Remove(renderedNodes[key].Last());
+                    }
+                    savedPositions.Remove(savedPositions.Last());
+                    break;
+                case 'B':
+                    break;
+                default:
+                    char nodeLetter = renderAxiom[axiomIterator];
+                    renderNode(nodeLetter, axiomIterator, renderedNodes[currentLetter].Last());
+                    break;
             }
-            l++;
+            axiomIterator++;
+
         }
+
     }
+
     void DestroyPreviousSystem()
     {
         foreach (GameObject node in GameObject.FindGameObjectsWithTag("Node"))
         {
             Destroy(node);
         }
-        renderedNodes = new Dictionary<char, int>();
+        renderedNodes = new Dictionary<char, List<int>>();
+
+        savedPositions = new List<Vector3>();
+        savedPositions.Add(nodeSystem.startingPoint);
     }
 
-    void renderNode(string letter, int index)
+    void renderNode(char letter, int index, int letterCounter)
     {
         Debug.Log("Adding node: " + letter + index);
         GameObject newNode = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-        newNode.transform.position= nodeSystem.GetNodePosition(letter, index);
+        
+        Vector3 nodePosition = nodeSystem.GetNodePosition(letter.ToString(), letterCounter % nodeSystem.GetNumberOfNodesForLetter(letter.ToString()));
+        newNode.transform.position = savedPositions.Last() + nodePosition;
+        savedPositions.Remove(savedPositions.Last());
+        savedPositions.Add(newNode.transform.position);
         newNode.transform.localScale = new Vector3(.2f, .2f, .2f);
         newNode.tag = "Node";
         NodeModel newNodeModel = newNode.AddComponent<NodeModel>();
-        newNodeModel.letter = letter;
+        newNodeModel.letter = letter.ToString();
         newNodeModel.index = index;
         newNodeModel.SetMaterial(nodeMaterial);
-        newNodeModel.SetColors(nodeActive, nodeInactive);
+        newNodeModel.SetColors(branchColors[letter], branchColors[letter] * 0.9f);
     }
 
 }

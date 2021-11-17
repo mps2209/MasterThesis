@@ -13,5 +13,13 @@ public class NodeControllerEditor : Editor
         {
             nodeController.AddNode();
         }
+        if (GUILayout.Button("Save Data"))
+        {
+            nodeController.PersistNodes();
+        }
+        if (GUILayout.Button("Load Nodes"))
+        {
+            nodeController.LoadNodes();
+        }
     }
 }
