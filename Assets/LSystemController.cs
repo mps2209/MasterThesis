@@ -32,8 +32,17 @@ public class LSystemController : MonoBehaviour
     }
     public void StepBack()
     {
-        lSystem.StepBack();
+        lSystem.StepBack(1);
         nodeRenderer.RenderLSystem();
 
+    }
+    public void ReRender()
+    {
+        lSystem.StepBack(0);
+
+    }
+    public bool Tip(int index)
+    {
+        return lSystem.Tip(index);
     }
 }

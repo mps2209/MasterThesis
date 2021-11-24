@@ -35,8 +35,10 @@ public class NodeSystem : MonoBehaviour
             Debug.Log("starting LSystem");
             this.startingPoint=node;
             startSet = true;
+            return;
         }
-        else if (nodes.ContainsKey(letter))
+
+        if (nodes.ContainsKey(letter))
         {
             nodes[letter].Add(node);
             Debug.Log(letter + " already has " + nodes[letter].Count + "entries");
@@ -49,7 +51,15 @@ public class NodeSystem : MonoBehaviour
             Debug.Log(letter + " already has " + nodes[letter].Count + "entries");
 
         }
+        if (letter == "A")
+        {
+            lSystemController.StepForward();
+        }
+        else
+        {
+            lSystemController.ReRender();
 
+        }
     }
     public Vector3 GetNodePosition(string letter, int index)
     {

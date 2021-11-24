@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.XR.Interaction.Toolkit;
+
 namespace Assets.Scripts
 {
 
@@ -14,10 +16,11 @@ namespace Assets.Scripts
         Renderer renderer;
         public Color activeColor;
         public Color inactiveColor;
-       
+        NodeController nodeController;
         private void Start()
         {
             inputController = GameObject.Find("GameController").GetComponent<InputController>();
+            nodeController= GameObject.Find("NodeController").GetComponent<NodeController>();
         }
 
 
@@ -44,6 +47,12 @@ namespace Assets.Scripts
         {
             inputController.hoveredNode = null;
             renderer.material.SetColor("_Color", inactiveColor);
+        }
+        public void Selected(SelectEnterEventArgs selectEnterEventArgs)
+        {
+            Debug.Log("selected Node"+ letter+ index);
+
+            nodeController.selectedNode = this;
         }
     }
 

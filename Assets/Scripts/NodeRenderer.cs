@@ -19,6 +19,7 @@ public class NodeRenderer : MonoBehaviour
     public float branchThickness;
     Dictionary<char, List<int>> renderedNodes = new Dictionary<char, List<int>>();
     public List<Vector3> savedPositions = new List<Vector3>();
+    public GameObject interactableNodePrefab;
     void Start()
     {
         lSystem = GameObject.Find("LSystemController").GetComponent<LSystem>();
@@ -107,7 +108,7 @@ public class NodeRenderer : MonoBehaviour
     void renderNode(char letter, int index, int letterCounter)
     {
         Debug.Log("Adding node: " + letter + index);
-        GameObject newNode = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+        GameObject newNode = GameObject.Instantiate(interactableNodePrefab,Vector3.zero,Quaternion.identity);
         
         Vector3 nodePosition = nodeSystem.GetNodePosition(letter.ToString(), letterCounter % nodeSystem.GetNumberOfNodesForLetter(letter.ToString()));
         newNode.transform.position = savedPositions.Last() + nodePosition;
@@ -115,7 +116,7 @@ public class NodeRenderer : MonoBehaviour
         savedPositions.Add(newNode.transform.position);
         newNode.transform.localScale = new Vector3(.2f, .2f, .2f);
         newNode.tag = "Node";
-        NodeModel newNodeModel = newNode.AddComponent<NodeModel>();
+        NodeModel newNodeModel = newNode.GetComponent<NodeModel>();
         newNodeModel.letter = letter.ToString();
         newNodeModel.index = index;
         newNodeModel.SetMaterial(nodeMaterial);

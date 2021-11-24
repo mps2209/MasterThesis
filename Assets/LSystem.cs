@@ -16,7 +16,7 @@ public class LSystem : MonoBehaviour
     public Text axiom;
     public Text rulesText;
     public Text alphabetText;
-    string initialAxiom;
+    string initialAxiom = "";
 
     string alphabet = "";
     public string nextAxiom;
@@ -25,7 +25,7 @@ public class LSystem : MonoBehaviour
     {
         InitRules();
         InitTexts();
-        initialAxiom = axiom.text;
+       
     }
 
     void InitRules()
@@ -77,9 +77,9 @@ public class LSystem : MonoBehaviour
         n++;
         IterateAxiom();
     }
-    public void StepBack()
+    public void StepBack(int steps)
     {
-        int step = n - 1;
+        int step = n - steps;
         n = 0;
         startingAxiom = initialAxiom;
         if (step != 0)
@@ -97,8 +97,17 @@ public class LSystem : MonoBehaviour
 
 
     }
+
+    
     void IterateAxiom()
     {
+        if (axiom.text =="")
+        {
+            axiom.text = "AB";
+            return;
+
+        }
+
         nextAxiom = "";
         startingAxiom = axiom.text;
         for (int position = 0; position < startingAxiom.Length; position++)
@@ -184,12 +193,9 @@ public class LSystem : MonoBehaviour
         }
 
     }
-    public void ApplyRules()
+    public bool Tip(int index)
     {
-    }
-    public void ApplyRule(Rule rule)
-    {
-
+        return axiom.text[index + 1] == 'B';
     }
 }
 [Serializable]
