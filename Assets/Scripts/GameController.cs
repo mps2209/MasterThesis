@@ -3,11 +3,11 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-
+    public GameState gameState;
 
     void Start()
     {
-
+        gameState = GameState.TrunkNotStarted;
     }
 
     // Update is called once per frame
@@ -18,4 +18,10 @@ public class GameController : MonoBehaviour
 
 
 
+}
+public enum GameState
+{
+    TrunkNotStarted,
+    TrunkDrawn,
+    BranchDrawn
 }

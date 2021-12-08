@@ -1,9 +1,10 @@
+using Assets.Scripts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+using System.Linq;
 public class LSystem : MonoBehaviour
 {
     // Start is called before the first frame update
@@ -12,7 +13,7 @@ public class LSystem : MonoBehaviour
     List<Rule> rules = new List<Rule>();
     List<LSystemModel> systems = new List<LSystemModel>();
 
-    public string startingAxiom;
+    public string startingAxiom= "AB";
     public Text axiom;
     public Text rulesText;
     public Text alphabetText;
@@ -23,9 +24,8 @@ public class LSystem : MonoBehaviour
     int n = 0;
     void Start()
     {
-        InitRules();
-        InitTexts();
-       
+
+
     }
 
     void InitRules()
@@ -69,16 +69,25 @@ public class LSystem : MonoBehaviour
 
     public void StepForward()
     {
+        Debug.Log("StepForward");
         if (n == 0)
         {
+
             InitRules();
             InitTexts();
         }
+
         n++;
         IterateAxiom();
     }
+    public int Step()
+    {
+        return n;
+    }
     public void StepBack(int steps)
     {
+        Debug.Log("StepBack");
+
         int step = n - steps;
         n = 0;
         startingAxiom = initialAxiom;
@@ -86,6 +95,7 @@ public class LSystem : MonoBehaviour
         {
             while (n < step)
             {
+
                 StepForward();
 
             }
@@ -98,10 +108,10 @@ public class LSystem : MonoBehaviour
 
     }
 
-    
+
     void IterateAxiom()
     {
-        if (axiom.text =="")
+        if (axiom.text == "")
         {
             axiom.text = "AB";
             return;
@@ -170,7 +180,7 @@ public class LSystem : MonoBehaviour
         this.selectors = new string[rules.Count];
         this.results = new string[rules.Count];
         int i = 0;
-        foreach(Rule rule in rules)
+        foreach (Rule rule in rules)
         {
             selectors[i] = rule.selector;
             results[i] = rule.result;
@@ -197,18 +207,47 @@ public class LSystem : MonoBehaviour
     {
         return axiom.text[index + 1] == 'B';
     }
-}
-[Serializable]
-public class Rule : System.Object
-{
-    public string selector;
-    public string result;
-    public Rule(string selector, string result)
+
+    /*public void UpdateRules(string newLetter, NodeModel previousNode)
     {
-        this.selector = selector;
-        this.result = result;
-    }
+        if (axiom.text.Contains(newLetter))
+        {
+            // no need for new rule;
+            Debug.Log("axiom already contains " + newLetter);
+            return;
+        }
+        else
+        {
+
+
+
+
+            char previousLetter = previousNode.letter;
+            int numPreviousLetters = previousNode.index;
+            string newSelector = "";
+            string newResult = "";
+
+            newSelector = new String(previousLetter, numPreviousLetters + 1);
+            newResult = new String(previousLetter, numPreviousLetters) + "[" + newLetter + "B" + "]" + previousLetter;
+
+            rules.Add(
+                new Rule(
+                  newSelector,
+                   newResult));
+            rules.Add(
+                new Rule(
+                    newLetter + "B",
+                    newLetter + "BB"));
+            rules.Add(
+                new Rule(
+            newLetter + "BB",
+            newLetter + newLetter + "B"));
+        }
+        UpdateRules();
+        InitTexts();
+    }*/
 }
+
 [Serializable]
 public class LSystemModel : System.Object
 {

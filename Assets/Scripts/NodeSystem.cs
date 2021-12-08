@@ -1,4 +1,4 @@
-using Assets.Scripts;
+/*using Assets.Scripts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -57,6 +57,7 @@ public class NodeSystem : MonoBehaviour
         }
         else
         {
+            Debug.Log("Rerendering");
             lSystemController.ReRender();
 
         }
@@ -155,4 +156,4 @@ class Node
         this.y = y;
         this.z = z;
     }
-}
+}*/

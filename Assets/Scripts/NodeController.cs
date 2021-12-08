@@ -1,4 +1,4 @@
-using Assets.Scripts;
+/*using Assets.Scripts;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,17 +7,19 @@ using System.Linq;
 public class NodeController : MonoBehaviour
 {
     NodeSystem nodeSystem;
-    public string nextLetter = "A";
+    public char nextLetter = 'A';
     public Vector3 nextNode = Vector3.zero;
     public NodeModel selectedNode;
     LSystemController lSystemController;
+    FluidVrRenderer fluidVrRenderer;
+    List<char> rulesAdded = new List<char>();
 
     // Start is called before the first frame update
     void Start()
     {
         nodeSystem = GetComponent<NodeSystem>();
         lSystemController = GameObject.Find("LSystemController").GetComponent<LSystemController>();
-
+        fluidVrRenderer = GameObject.Find("VrRenderer").GetComponent<FluidVrRenderer>();
     }
 
     // Update is called once per frame
@@ -26,6 +28,7 @@ public class NodeController : MonoBehaviour
 
     }
 
+
     public void AddNode(string letter, Vector3 node)
     {
 
@@ -33,43 +36,45 @@ public class NodeController : MonoBehaviour
         {
         }
         Debug.Log("Adding Node " + letter);
-        nodeSystem.addNode(letter, node );
+        nodeSystem.addNode(letter, node);
 
-        
+
     }
     public void AddNode()
     {
         Debug.Log("Adding Node " + this.nextLetter);
 
-        nodeSystem.addNode(this.nextLetter, this.nextNode);
+        nodeSystem.addNode(this.nextLetter.ToString(), this.nextNode);
 
     }
-    public string GetLetter()
+    public char GetLetter()
     {
         return nextLetter;
     }
     public void UpdateLetter()
     {
-        if (!lSystemController.Tip(selectedNode.index))
+
+
+        Debug.Log("Updating Letter");
+        char[] allLetters = new char[fluidVrRenderer.renderers.Keys.Count];
+        fluidVrRenderer.renderers.Keys.CopyTo(allLetters, 0);
+        char lastLetter = allLetters.Last();
+        if (lastLetter == 'A')
         {
-
-
-            string[] allLetters = new string[nodeSystem.nodes.Keys.Count];
-            nodeSystem.nodes.Keys.CopyTo(allLetters, 0);
-            char lastLetter = allLetters.Last().ToCharArray().First();
-            if (lastLetter == 'A')
-            {
-                lastLetter++;
-            }
-
             lastLetter++;
-            nextLetter = lastLetter.ToString();
         }
-        else
+
+        lastLetter++;
+        nextLetter = lastLetter;
+        if (!rulesAdded.Contains(nextLetter))
         {
-            nextLetter = selectedNode.letter;
+            Debug.Log("Letter Not in rules yet, adding letter" + nextLetter + "For Node " + selectedNode.letter+selectedNode.index );
+            rulesAdded.Add(nextLetter);
+            lSystemController.UpdateRules(nextLetter.ToString(), selectedNode);
+
         }
-        
+
+
     }
     public void PersistNodes()
     {
@@ -81,4 +86,4 @@ public class NodeController : MonoBehaviour
 
     }
 
-}
+}*/
