@@ -15,6 +15,8 @@ public class SketchBranchView : MonoBehaviour
     public Dictionary<char, LineRenderer> sketchedBranches = new Dictionary<char, LineRenderer>();
     SketchingPlatformController platformController;
     MVCInputController inputController;
+    MVCLSystem lSystem;
+
     GameObject rightController;
     Vector3 startingPoint = Vector3.zero;
     [SerializeField]
@@ -24,6 +26,7 @@ public class SketchBranchView : MonoBehaviour
     {
         platformController = GetComponent<SketchingPlatformController>();
         inputController = GameObject.FindGameObjectWithTag("GameController").GetComponent<MVCInputController>();
+        lSystem = GameObject.Find("LSystem").GetComponent<MVCLSystem>();
         rightController = GameObject.Find("RightHand Controller");
         InitIndicatorLineRenderer();
         InitSketchedBranch(selectedNode.letter, transform.position);
@@ -158,7 +161,9 @@ public class SketchBranchView : MonoBehaviour
         int newIndex = 0;
         Debug.Log("AddNewBranch " + newLetter);
         InitSketchedBranch(newLetter, transform.position+sketchedBranches['A'].GetPosition(selectedNode.index));
+        lSystem.AddBranchRule(selectedNode.letter, newLetter, selectedNode.index,1,2);
         selectedNode = new SketchedBranchNode(newIndex, newLetter);
+        
     }
 
     public void SetSelectedNode(SketchedNodeModel nodeModel)

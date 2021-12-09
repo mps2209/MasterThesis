@@ -11,6 +11,10 @@ public class MVCLSystem : MonoBehaviour
     public Text alphabetText;
     public List<Rule> rules = new List<Rule>();
     string startingAxiom = "AB";
+    string initalAxiom = "AB";
+
+    string nextAxiom;
+
     int step = 0;
     // Start is called before the first frame update
     void Start()
@@ -28,8 +32,11 @@ public class MVCLSystem : MonoBehaviour
     {
         if (step == 0)
         {
-            axiom.text = startingAxiom;
+            
+            axiom.text = initalAxiom;
             rules.Add(new Rule("AB", "AAB"));
+            step++;
+
         }
         else
         {
@@ -39,17 +46,31 @@ public class MVCLSystem : MonoBehaviour
     }
     public void StepBack()
     {
-        if (step < 1)
+        if (step > 1)
         {
             step--;
-            axiom.text = startingAxiom;
+            if (step == 1)
+            {
+
+                axiom.text = initalAxiom;
+                rules.Add(new Rule("AB", "AAB"));
+             
+
+            }
+            else
+            {
+
+                axiom.text = initalAxiom;
+                int n = 1;
+                while (n < step)
+                {
+                    IterateAxiom();
+                    n++;
+                }
+            }
+
         }
-        int n = 0;
-        while (n < step)
-        {
-            IterateAxiom();
-            n++;
-        }
+
     }
     public int Step()
     {
@@ -57,11 +78,11 @@ public class MVCLSystem : MonoBehaviour
     }
     void IterateAxiom()
     {
-        string newAxiom = axiom.text;
-        string currentAxiom = axiom.text;
-        for (int position = 0; position < currentAxiom.Length; position++)
+        nextAxiom = "";
+        startingAxiom = axiom.text;
+        for (int position = 0; position < startingAxiom.Length; position++)
         {
-            int selectorSize = currentAxiom.Length - position;
+            int selectorSize = startingAxiom.Length - position;
             Rule matchedRule = null;
             while (selectorSize > 0)
             {
@@ -70,10 +91,14 @@ public class MVCLSystem : MonoBehaviour
                 foreach (Rule rule in rules)
                 {
 
-                    if (currentAxiom.Substring(position, selectorSize) == rule.selector)
+                    if (startingAxiom.Substring(position, selectorSize) == rule.selector)
                     {
                         matchedRule = rule;
-                        newAxiom += rule.result;
+                        //Debug.Log("Found match at: " + position + " with length " + selectorSize);
+
+                        //Debug.Log(startingAxiom + " =>" + nextAxiom + " + " + matchedRule.selector + "=>" + matchedRule.result);
+
+                        nextAxiom += rule.result;
                         position += selectorSize - 1;
                         selectorSize = 0;
 
@@ -86,14 +111,24 @@ public class MVCLSystem : MonoBehaviour
             }
             if (matchedRule == null)
             {
-                newAxiom += startingAxiom.Substring(position, 1);
+                nextAxiom += startingAxiom.Substring(position, 1);
 
                 //Debug.Log(startingAxiom + " =>" + nextAxiom);
 
             }
 
         }
-        axiom.text = newAxiom;
+        axiom.text = nextAxiom;
+    }
+    public void AddBranchRule(char previousBranch,char nextBranch, int previousSections, int growthRatenominator,int growthRateDenominator)
+    {
+        rules.Add(new Rule(new string(previousBranch, previousSections + 1),
+            new string(previousBranch, previousSections) + "[CB]"+ previousBranch));
+        rules.Add(new Rule(nextBranch+"B", nextBranch+ "BB"));
+        rules.Add(new Rule(nextBranch + new string('B', growthRateDenominator),
+            new string(nextBranch, growthRatenominator+1) +"B"));
+
+
 
     }
 }

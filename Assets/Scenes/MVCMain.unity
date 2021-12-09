@@ -685,6 +685,9 @@ MonoBehaviour:
   axiom: {fileID: 1198484104}
   rulesText: {fileID: 444733181}
   alphabetText: {fileID: 1446816662}
+  rules:
+  - selector: 
+    result: 
 --- !u!1 &111531782
 GameObject:
   m_ObjectHideFlags: 0
@@ -760,6 +763,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3726954cfead62b40a7d8b881ae92c6c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  previousSection:
+    index: 0
+    letter: 0
+    distance: 0
+    x: 0
+    y: 0
+    z: 0
+    w: 0
 --- !u!4 &227271703
 Transform:
   m_ObjectHideFlags: 0

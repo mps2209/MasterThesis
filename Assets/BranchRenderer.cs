@@ -22,14 +22,13 @@ public class BranchRenderer : MonoBehaviour
         sketchedBranchView = GameObject.Find("SketchingPlatform").GetComponent<SketchBranchView>();
         lSystem = GameObject.Find("LSystem").GetComponent<MVCLSystem>();
         sketchBranchModel = GameObject.Find("SketchBranchController").GetComponent<SketchBranchModel>();
-
+        renderedBranches = new Dictionary<char, List<LineRenderer>>();
+        branchSectionCounter = new Dictionary<char, List<int>>();
 
 
     }
     void InitNewLineRenderer(char letter)
     {
-        renderedBranches = new Dictionary<char, List<LineRenderer>>();
-        branchSectionCounter = new Dictionary<char, List<int>>();
         if (currentLineRenderer != null)
         {
             Destroy(currentLineRenderer.gameObject);
@@ -58,11 +57,13 @@ public class BranchRenderer : MonoBehaviour
 
     public void RenderTree()
     {
-        foreach(GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
+        renderedBranches = new Dictionary<char, List<LineRenderer>>();
+        branchSectionCounter = new Dictionary<char, List<int>>();
+
+        foreach (GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
         {
             Destroy(branch);
         }
-        InitNewLineRenderer('A');
         string currentAxiom = lSystem.axiom.text;
         int axiomCounter = 0;
         
@@ -81,8 +82,11 @@ public class BranchRenderer : MonoBehaviour
     }
     void RenderSection(char letter)
     {
+        //Debug.Log("Rendering Section");
         if (!branchSectionCounter.ContainsKey(letter))
         {
+            //Debug.Log("No Entry Yet");
+
             branchSectionCounter[letter] = new List<int>();
             branchSectionCounter[letter].Add(0);
             turtle.transform.rotation = Quaternion.identity;
@@ -90,7 +94,7 @@ public class BranchRenderer : MonoBehaviour
 
         }
 
-        Debug.Log("Rendering" + letter + branchSectionCounter[letter].Last());
+        //Debug.Log("Rendering" + letter + branchSectionCounter[letter].Last());
         Vector3 drawingDistance = GetDistance(letter, branchSectionCounter[letter].Last());
         Quaternion drawingRotation = GetRotation(drawingDistance);
         SketchedBranchSection currentBranchSection = new SketchedBranchSection(branchSectionCounter[letter].Last(), letter, drawingDistance.magnitude, drawingRotation);
@@ -105,7 +109,10 @@ public class BranchRenderer : MonoBehaviour
 
     Vector3 GetDistance(char letter, int index) {
         LineRenderer branchRenderer = sketchedBranchView.sketchedBranches[letter];
+
         index = index % (branchRenderer.positionCount - 1);
+
+        
         return branchRenderer.GetPosition(index + 1) - branchRenderer.GetPosition(index);
 
     }

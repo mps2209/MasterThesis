@@ -58,6 +58,7 @@ public class MVCInputController : MonoBehaviour
         float buttonPressed = callbackContext.ReadValue<float>();
         if (buttonPressed == 0)
         {
+            Debug.Log("Stepping Forward");
             lSystem.StepForward();
 
             branchRenderer.RenderTree();
@@ -68,6 +69,8 @@ public class MVCInputController : MonoBehaviour
         float buttonPressed = callbackContext.ReadValue<float>();
         if (buttonPressed == 0)
         {
+            Debug.Log("Stepping Backward");
+
             lSystem.StepBack();
 
             branchRenderer.RenderTree();
