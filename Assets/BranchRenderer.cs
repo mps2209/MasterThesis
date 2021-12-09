@@ -14,7 +14,7 @@ public class BranchRenderer : MonoBehaviour
     LineRenderer currentLineRenderer;
     Dictionary<char, List<int>> branchSectionCounter = new Dictionary<char, List<int>>();
     Dictionary<char, List<LineRenderer>> renderedBranches = new Dictionary<char, List<LineRenderer>>();
-
+    List<Vector3> savedPositions = new List<Vector3>();
     SketchBranchView sketchedBranchView;
     // Start is called before the first frame update
     void Start()
@@ -24,29 +24,30 @@ public class BranchRenderer : MonoBehaviour
         sketchBranchModel = GameObject.Find("SketchBranchController").GetComponent<SketchBranchModel>();
         renderedBranches = new Dictionary<char, List<LineRenderer>>();
         branchSectionCounter = new Dictionary<char, List<int>>();
-
+        savedPositions.Add(Vector3.zero);
 
     }
     void InitNewLineRenderer(char letter)
     {
-        if (currentLineRenderer != null)
-        {
-            Destroy(currentLineRenderer.gameObject);
-        }
-        turtle.transform.position = transform.position;
+        
         turtle.transform.rotation = Quaternion.identity;
-        currentLineRenderer = new GameObject().AddComponent<LineRenderer>().GetComponent<LineRenderer>();
-        currentLineRenderer.gameObject.name = "Branch";
-        currentLineRenderer.gameObject.tag = "Branch";
+        LineRenderer newLineRenderer = new GameObject().AddComponent<LineRenderer>().GetComponent<LineRenderer>();
+        newLineRenderer.gameObject.name = "Branch";
+        newLineRenderer.gameObject.tag = "Branch";
 
-        currentLineRenderer.material = lineRendererMaterial;
-        currentLineRenderer.material.color = lineRendererColor;
-        currentLineRenderer.startWidth = indicatorWidth;
-        currentLineRenderer.endWidth = indicatorWidth;
-        currentLineRenderer.positionCount = 1;
-        currentLineRenderer.gameObject.transform.position = transform.position;
-        currentLineRenderer.gameObject.transform.parent = transform;
-        currentLineRenderer.SetPosition(0, turtle.transform.position);
+        newLineRenderer.material = lineRendererMaterial;
+        newLineRenderer.startWidth = indicatorWidth;
+        newLineRenderer.endWidth = indicatorWidth;
+        newLineRenderer.positionCount = 1;
+        newLineRenderer.gameObject.transform.position = transform.position + savedPositions.Last();
+        newLineRenderer.gameObject.transform.parent = transform;
+        newLineRenderer.SetPosition(0, turtle.transform.position);
+        if (!renderedBranches.ContainsKey(letter))
+        {
+            renderedBranches[letter] = new List<LineRenderer>();
+        }
+        renderedBranches[letter].Add(newLineRenderer);
+
     }
     // Update is called once per frame
     void Update()
@@ -57,6 +58,7 @@ public class BranchRenderer : MonoBehaviour
 
     public void RenderTree()
     {
+        turtle.transform.position = transform.position;
         renderedBranches = new Dictionary<char, List<LineRenderer>>();
         branchSectionCounter = new Dictionary<char, List<int>>();
 
@@ -69,10 +71,32 @@ public class BranchRenderer : MonoBehaviour
         
         while (axiomCounter < currentAxiom.Length)
         {
+            char[] keys = renderedBranches.Keys.ToArray();
+
             switch (currentAxiom[axiomCounter])
             {
                 case 'B':
                     break;
+                case '[':
+                    savedPositions.Add(turtle.transform.position);
+                    foreach (char key in keys)
+                    {
+                        InitNewLineRenderer(key);
+                        branchSectionCounter[key].Add(0);
+
+                    }
+                    break;
+                case ']':
+                    
+                    turtle.transform.position = savedPositions.Last();
+                    savedPositions.Remove(savedPositions.Last());
+                    foreach (char key in keys)
+                    {
+                        renderedBranches[key].Remove(renderedBranches[key].Last()) ;
+                        branchSectionCounter[key].Remove(branchSectionCounter[key].Last());
+
+                    }
+                    break;    
                 default:
                     RenderSection(currentAxiom[axiomCounter]);
                     break;
@@ -93,8 +117,8 @@ public class BranchRenderer : MonoBehaviour
             InitNewLineRenderer(letter);
 
         }
-
-        //Debug.Log("Rendering" + letter + branchSectionCounter[letter].Last());
+        currentLineRenderer = renderedBranches[letter].Last();
+        Debug.Log("Rendering" + letter + branchSectionCounter[letter].Last());
         Vector3 drawingDistance = GetDistance(letter, branchSectionCounter[letter].Last());
         Quaternion drawingRotation = GetRotation(drawingDistance);
         SketchedBranchSection currentBranchSection = new SketchedBranchSection(branchSectionCounter[letter].Last(), letter, drawingDistance.magnitude, drawingRotation);
