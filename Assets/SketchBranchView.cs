@@ -161,7 +161,7 @@ public class SketchBranchView : MonoBehaviour
         int newIndex = 0;
         Debug.Log("AddNewBranch " + newLetter);
         InitSketchedBranch(newLetter, transform.position+sketchedBranches['A'].GetPosition(selectedNode.index));
-        lSystem.AddBranchRule(selectedNode.letter, newLetter, selectedNode.index,1,2);
+        lSystem.AddBranchRule(selectedNode.letter, newLetter, selectedNode.index,1,3,3);
         selectedNode = new SketchedBranchNode(newIndex, newLetter);
         
     }

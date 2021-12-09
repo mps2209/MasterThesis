@@ -120,14 +120,15 @@ public class MVCLSystem : MonoBehaviour
         }
         axiom.text = nextAxiom;
     }
-    public void AddBranchRule(char previousBranch,char nextBranch, int previousSections, int growthRatenominator,int growthRateDenominator)
+    public void AddBranchRule(char previousBranch,char nextBranch, int previousSections, int growthRatenominator,int growthRateDenominator, int branchOffRate)
     {
         rules.Add(new Rule(new string(previousBranch, previousSections + 1),
             new string(previousBranch, previousSections) + "[CB]"+ previousBranch));
         rules.Add(new Rule(nextBranch+"B", nextBranch+ "BB"));
         rules.Add(new Rule(nextBranch + new string('B', growthRateDenominator),
             new string(nextBranch, growthRatenominator+1) +"B"));
-
+        rules.Add(new Rule(new string(nextBranch, branchOffRate + 1),
+    new string(nextBranch, branchOffRate) + "[CB]" + nextBranch));
 
 
     }
