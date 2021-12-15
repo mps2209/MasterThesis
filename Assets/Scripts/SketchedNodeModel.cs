@@ -21,8 +21,8 @@ namespace Assets.Scripts
         {
             sketchBranchView= GameObject.Find("SketchingPlatform").GetComponent<SketchBranchView>();
             renderer = GetComponent<Renderer>();
-            inactiveColor = renderer.material.GetColor("_Color");
-            activeColor= renderer.material.GetColor("_Color")*.8f;
+            inactiveColor = renderer.material.color;
+            activeColor = renderer.material.color;
         }
 
 

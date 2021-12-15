@@ -15,7 +15,11 @@ public class BranchRenderer : MonoBehaviour
     Dictionary<char, List<int>> branchSectionCounter = new Dictionary<char, List<int>>();
     Dictionary<char, List<LineRenderer>> renderedBranches = new Dictionary<char, List<LineRenderer>>();
     List<Vector3> savedPositions = new List<Vector3>();
+    public List<int> timesBranchedOff = new List<int>();
+
     SketchBranchView sketchedBranchView;
+    int degreeCounter = -1;
+    bool rotateBranch = false;
     // Start is called before the first frame update
     void Start()
     {
@@ -25,11 +29,12 @@ public class BranchRenderer : MonoBehaviour
         renderedBranches = new Dictionary<char, List<LineRenderer>>();
         branchSectionCounter = new Dictionary<char, List<int>>();
         savedPositions.Add(Vector3.zero);
-
+        timesBranchedOff.Add(0);
     }
     void InitNewLineRenderer(char letter)
     {
-        
+        //Quaternion diffRotation = Quaternion.LookRotation(Vector3.up, Vector3.up) * Quaternion.Inverse(turtle.transform.rotation);
+        // turtle.transform.rotation = diffRotation * turtle.transform.rotation;
         turtle.transform.rotation = Quaternion.identity;
         LineRenderer newLineRenderer = new GameObject().AddComponent<LineRenderer>().GetComponent<LineRenderer>();
         newLineRenderer.gameObject.name = "Branch";
@@ -59,8 +64,13 @@ public class BranchRenderer : MonoBehaviour
     public void RenderTree()
     {
         turtle.transform.position = transform.position;
+        savedPositions = new List<Vector3>();
+        savedPositions.Add(Vector3.zero);
         renderedBranches = new Dictionary<char, List<LineRenderer>>();
         branchSectionCounter = new Dictionary<char, List<int>>();
+        timesBranchedOff = new List<int>();
+        timesBranchedOff.Add(0);
+        degreeCounter = -1;
 
         foreach (GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
         {
@@ -68,7 +78,7 @@ public class BranchRenderer : MonoBehaviour
         }
         string currentAxiom = lSystem.axiom.text;
         int axiomCounter = 0;
-        
+
         while (axiomCounter < currentAxiom.Length)
         {
             char[] keys = renderedBranches.Keys.ToArray();
@@ -78,7 +88,11 @@ public class BranchRenderer : MonoBehaviour
                 case 'B':
                     break;
                 case '[':
+                    timesBranchedOff[timesBranchedOff.Count - 1]++;
+
+                    rotateBranch = true;
                     savedPositions.Add(turtle.transform.position);
+
                     foreach (char key in keys)
                     {
                         InitNewLineRenderer(key);
@@ -87,18 +101,20 @@ public class BranchRenderer : MonoBehaviour
                     }
                     break;
                 case ']':
-                    
+
                     turtle.transform.position = savedPositions.Last();
                     savedPositions.Remove(savedPositions.Last());
                     foreach (char key in keys)
                     {
-                        renderedBranches[key].Remove(renderedBranches[key].Last()) ;
+                        renderedBranches[key].Remove(renderedBranches[key].Last());
                         branchSectionCounter[key].Remove(branchSectionCounter[key].Last());
 
                     }
-                    break;    
+                    timesBranchedOff.Remove(timesBranchedOff.Last());
+                    break;
                 default:
                     RenderSection(currentAxiom[axiomCounter]);
+                    rotateBranch = false;
                     break;
             }
             axiomCounter++;
@@ -113,79 +129,56 @@ public class BranchRenderer : MonoBehaviour
 
             branchSectionCounter[letter] = new List<int>();
             branchSectionCounter[letter].Add(0);
-            turtle.transform.rotation = Quaternion.identity;
+            //turtle.transform.rotation = Quaternion.identity;
             InitNewLineRenderer(letter);
 
         }
         currentLineRenderer = renderedBranches[letter].Last();
-        Debug.Log("Rendering" + letter + branchSectionCounter[letter].Last());
         Vector3 drawingDistance = GetDistance(letter, branchSectionCounter[letter].Last());
-        Quaternion drawingRotation = GetRotation(drawingDistance);
-        SketchedBranchSection currentBranchSection = new SketchedBranchSection(branchSectionCounter[letter].Last(), letter, drawingDistance.magnitude, drawingRotation);
+        
+        //SketchedBranchSection currentBranchSection = new SketchedBranchSection(branchSectionCounter[letter].Last(), letter, drawingDistance.magnitude, drawingRotation);
+
+        //turtle.transform.rotation = Quaternion.identity;
+
+        //turtle.transform.rotation = diffRotation * turtle.transform.rotation;
         turtle.transform.rotation = Quaternion.identity;
-        turtle.transform.rotation = currentBranchSection.GetRotation();
-        turtle.transform.position += turtle.transform.forward * currentBranchSection.distance;
+        Quaternion drawingRotation = GetRotation(drawingDistance);
+
+
+        if (rotateBranch)
+        {
+            Debug.Log("rotating turtle");
+            //rotate
+            turtle.transform.Rotate(Vector3.up, 137 * timesBranchedOff.Last());
+            timesBranchedOff.Add(0);
+            //turtle.transform.rotation = Quaternion.Euler(0, 0, 137 * timesBranchedOff.Last()) * turtle.transform.rotation;
+        }
+        //Look at target
+        turtle.transform.rotation = drawingRotation * turtle.transform.rotation;
+        turtle.transform.position += turtle.transform.forward * drawingDistance.magnitude;
         currentLineRenderer.positionCount++;
         currentLineRenderer.SetPosition(currentLineRenderer.positionCount - 1, turtle.transform.position);
-        branchSectionCounter[letter][branchSectionCounter[letter].Count-1]++;
+        branchSectionCounter[letter][branchSectionCounter[letter].Count - 1]++;
 
     }
 
-    Vector3 GetDistance(char letter, int index) {
+    Vector3 GetDistance(char letter, int index)
+    {
         LineRenderer branchRenderer = sketchedBranchView.sketchedBranches[letter];
 
         index = index % (branchRenderer.positionCount - 1);
 
-        
+
         return branchRenderer.GetPosition(index + 1) - branchRenderer.GetPosition(index);
 
     }
     Quaternion GetRotation(Vector3 delta)
     {
-        return Quaternion.LookRotation(delta, Vector3.up);
+        return Quaternion.LookRotation(delta, turtle.transform.up);
 
     }
 
 
-    /*
-     * 
-     * 
-    int i = 0;
-    int k = 0;
-    char[] keys = new char[sketchBranchModel.sketchedBranches.Keys.Count];
-    int currentLetter = 0;
-    sketchBranchModel.sketchedBranches.Keys.CopyTo(keys, 0);
-    if (i > renderStep)
-    {
-        return false;
-    }
-    while (i < renderStep)
-    {
-
-        while (currentLetter < keys.Length &&
-            sketchBranchModel.sketchedBranches[keys[currentLetter]].sections.Length <= k)
-        {
-            currentLetter++;
-            k = 0;
-        }
-        if (currentLetter < keys.Length && k < sketchBranchModel.sketchedBranches[keys[currentLetter]].sections.Length)
-        {
-            SketchedBranchSection currentBranchSection = sketchBranchModel.sketchedBranches[keys[currentLetter]].sections[k];
-            turtle.transform.rotation = currentBranchSection.rotation;
-            turtle.transform.position += turtle.transform.forward * currentBranchSection.distance;
-            currentLineRenderer.positionCount++;
-            currentLineRenderer.SetPosition(currentLineRenderer.positionCount - 1, turtle.transform.position);
-
-        }
-        else
-        {
-            return false;
-        }
-
-        //Todo render LineRendere
-        k++;
-        i++;
-    }*/
 
 
 }
