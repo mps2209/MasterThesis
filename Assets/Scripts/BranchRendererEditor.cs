@@ -13,6 +13,14 @@ public class BranchRendererEditor : Editor
         {
             branchRenderer.RenderTree();
         }
+        if (GUILayout.Button("UpdateBranchRotation"))
+        {
+            branchRenderer.UpdateBranchRotation();
+        }
+        if (GUILayout.Button("Reset Rotation"))
+        {
+            branchRenderer.ResetBranchRotation();
+        }
     }
 
 }
