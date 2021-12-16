@@ -21,6 +21,7 @@ namespace Assets.Scripts
         {
             sketchBranchView= GameObject.Find("SketchingPlatform").GetComponent<SketchBranchView>();
             renderer = GetComponent<Renderer>();
+
             inactiveColor = renderer.material.color;
             activeColor = renderer.material.color;
         }
@@ -48,14 +49,14 @@ namespace Assets.Scripts
         }
         public void HoverEnter(HoverEnterEventArgs selectEnterEventArgs)
         {
-            renderer.material.color = activeColor;
+            renderer.material.SetColor("_Color", activeColor);
 
 
         }
         public void HoverExxit(HoverExitEventArgs selectEnterEventArgs)
         {
 
-            renderer.material.color = inactiveColor;
+            renderer.material.SetColor("_Color", inactiveColor);
 
         }
         public int Index()

@@ -15,6 +15,8 @@ public class MVCInputController : MonoBehaviour
     SketchBranchView sketchBranchView;
     BranchRenderer branchRenderer;
     MVCLSystem lSystem;
+    public bool rightSelectPressed;
+    public bool leftSelectPressed;
 
     void Start()
     {

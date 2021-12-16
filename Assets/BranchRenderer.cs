@@ -2,12 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+
 public class BranchRenderer : MonoBehaviour
 {
     public GameObject turtle;
     public Material lineRendererMaterial;
     public Color lineRendererColor;
     public float indicatorWidth = .2f;
+    public float turtleScale=1f;
+    public float rotationAngle=137f;
+    public GameObject leafPrefab;
     MVCLSystem lSystem;
     SketchBranchModel sketchBranchModel;
     LineRenderer currentLineRenderer;
@@ -17,6 +21,7 @@ public class BranchRenderer : MonoBehaviour
     SketchBranchView sketchedBranchView;
     bool branchedOff = false;
     GameObject initalLineRenderer;
+    RotationInputController rotationInputController;
     // Start is called before the first frame update
     void Start()
     {
@@ -26,6 +31,7 @@ public class BranchRenderer : MonoBehaviour
         renderedBranches = new Dictionary<char, List<LineRenderer>>();
         branchSectionCounter = new Dictionary<char, List<int>>();
         savedPositions.Add(Vector3.zero);
+
 
     }
     void InitNewLineRenderer(char letter)
@@ -99,6 +105,10 @@ public class BranchRenderer : MonoBehaviour
         {
             Destroy(branch);
         }
+        foreach (GameObject leaf in GameObject.FindGameObjectsWithTag("Leaf"))
+        {
+            Destroy(leaf);
+        }
         string currentAxiom = lSystem.axiom.text;
         int axiomCounter = 0;
 
@@ -143,6 +153,13 @@ public class BranchRenderer : MonoBehaviour
             }
             axiomCounter++;
         }
+        CleanUpTree();
+        UpdateBranchRotation();
+        AddLeafes();
+    }
+
+    void CleanUpTree()
+    {
         foreach (GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
         {
             if (branch.GetComponent<LineRenderer>().positionCount <= 1)
@@ -151,7 +168,19 @@ public class BranchRenderer : MonoBehaviour
 
             }
         }
-        UpdateBranchRotation();
+    }
+    void AddLeafes()
+    {
+        foreach (GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
+        {
+            LineRenderer branchRenderer = branch.GetComponent<LineRenderer>();
+            
+            GameObject leaf= Instantiate(leafPrefab, branchRenderer.transform.position, Quaternion.identity);
+            leaf.transform.parent = branchRenderer.transform;
+            leaf.transform.localPosition= branchRenderer.GetPosition(branchRenderer.positionCount - 1);
+
+        }
+
     }
     void RenderSection(char letter)
     {
@@ -194,7 +223,7 @@ public class BranchRenderer : MonoBehaviour
         }
         //Look at target
         turtle.transform.rotation = drawingRotation * turtle.transform.rotation;
-        turtle.transform.position += turtle.transform.forward * drawingDistance.magnitude;
+        turtle.transform.position += turtle.transform.forward * drawingDistance.magnitude*turtleScale;
         currentLineRenderer.positionCount++;
         currentLineRenderer.SetPosition(currentLineRenderer.positionCount - 1, turtle.transform.position- currentLineRenderer.transform.position);
         branchSectionCounter[letter][branchSectionCounter[letter].Count - 1]++;
@@ -270,7 +299,7 @@ public class BranchRenderer : MonoBehaviour
         foreach (GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
         {
             RotationController rotationController= branch.GetComponent<RotationController>();
-            rotationController.UpdateBranchRotation();
+            rotationController.UpdateBranchRotation(rotationAngle);
         }
     }
 

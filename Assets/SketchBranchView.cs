@@ -21,6 +21,8 @@ public class SketchBranchView : MonoBehaviour
     Vector3 startingPoint = Vector3.zero;
     [SerializeField]
     SketchedBranchNode selectedNode;
+    SketchedBranchNode branchOffNode;
+    Dictionary<char, List<GameObject>> nodes = new Dictionary<char, List<GameObject>>();
     // Start is called before the first frame update
     void Start()
     {
@@ -167,7 +169,11 @@ public class SketchBranchView : MonoBehaviour
         nodeModel.Letter(selectedNode.letter);
         Debug.Log("Instantiating Node " + selectedNode.letter + selectedNode.index);
         Debug.Log("Instantiated Node " + nodeModel.Letter() + nodeModel.Index());
-
+        if (!nodes.ContainsKey(selectedNode.letter))
+        {
+            nodes[selectedNode.letter] = new List<GameObject>();
+        }
+        nodes[selectedNode.letter].Add(interactableNode);
 
     }
     void AddNewBranch()
@@ -185,14 +191,43 @@ public class SketchBranchView : MonoBehaviour
         Debug.Log("AddNewBranch " + newLetter);
         InitSketchedBranch(newLetter, transform.position+sketchedBranches['A'].GetPosition(selectedNode.index));
         lSystem.AddBranchRule(selectedNode.letter, newLetter, selectedNode.index,1,3,3);
+        branchOffNode = selectedNode;
+
         selectedNode = new SketchedBranchNode(newIndex, newLetter);
-        
     }
 
     public void SetSelectedNode(SketchedNodeModel nodeModel)
     {
         Debug.Log("SetSelectedNode");
-        selectedNode = new SketchedBranchNode(nodeModel.Index(), nodeModel.Letter());
+        if (IsTip(nodeModel) || sketchedBranches.Count < 2)
+        {
+            selectedNode = new SketchedBranchNode(nodeModel.Index(), nodeModel.Letter());
+
+        }
+        else
+        {
+            if (branchOffNode.index == nodeModel.Index() && branchOffNode.letter == nodeModel.Letter())
+            {
+                Destroy(sketchedBranches['C']);
+                sketchedBranches.Remove('C');
+                foreach (GameObject go in nodes[selectedNode.letter])
+                {
+                    Destroy(go);
+                }
+            }
+            else
+            {
+                if (nodeModel.Index() >= branchOffNode.index && branchOffNode.letter == nodeModel.Letter())
+                {
+                    sketchedBranches[branchOffNode.letter].positionCount = nodeModel.Index();
+                    nodes[branchOffNode.letter].RemoveRange(nodeModel.Index(), nodes[branchOffNode.letter].Count - nodeModel.Index() - 1);
+                }
+            }
+        }
+    }
+    bool IsTip(SketchedNodeModel nodeModel)
+    {
+        return sketchedBranches[nodeModel.Letter()].positionCount - 1 == nodeModel.Index();
     }
 }
 public class SketchedBranchNode

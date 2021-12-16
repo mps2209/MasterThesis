@@ -14,12 +14,16 @@ public class MVCLSystem : MonoBehaviour
     string initalAxiom = "AB";
 
     string nextAxiom;
-
+    public int previousSections;
+    public int growthRateNominator;
+    public int growthRateDenominator;
+    public int branchOffRate;
     int step = 0;
+    BranchRenderer branchRenderer;
     // Start is called before the first frame update
     void Start()
     {
-
+        branchRenderer = GameObject.Find("Tree").GetComponent<BranchRenderer>();
     }
 
     // Update is called once per frame
@@ -32,7 +36,7 @@ public class MVCLSystem : MonoBehaviour
     {
         if (step == 0)
         {
-            
+
             axiom.text = initalAxiom;
             rules.Add(new Rule("AB", "AAB"));
             step++;
@@ -54,7 +58,7 @@ public class MVCLSystem : MonoBehaviour
 
                 axiom.text = initalAxiom;
                 rules.Add(new Rule("AB", "AAB"));
-             
+
 
             }
             else
@@ -120,18 +124,33 @@ public class MVCLSystem : MonoBehaviour
         }
         axiom.text = nextAxiom;
     }
-    public void AddBranchRule (char previousBranch,char nextBranch, int previousSections, int growthRatenominator,int growthRateDenominator, int branchOffRate)
+    public void AddBranchRule(char previousBranch, char nextBranch, int previousSections, int growthRateNominator, int growthRateDenominator, int branchOffRate)
     {
+        this.previousSections = previousSections;
+        this.growthRateDenominator = growthRateDenominator;
+        this.growthRateNominator = growthRateNominator;
+        this.branchOffRate = branchOffRate;
         rules.Add(new Rule(new string(previousBranch, previousSections + 1),
-            new string(previousBranch, previousSections) + "[CB]"+ previousBranch));
-        rules.Add(new Rule(nextBranch+"B", nextBranch+ "BB"));
+            new string(previousBranch, previousSections) + "[CB]" + previousBranch));
+        rules.Add(new Rule(nextBranch + "B", nextBranch + "BB"));
         rules.Add(new Rule(nextBranch + new string('B', growthRateDenominator),
-            new string(nextBranch, growthRatenominator+1) +"B"));
+            new string(nextBranch, growthRateNominator + 1) + "B"));
         rules.Add(new Rule(new string(nextBranch, branchOffRate + 1),
-    new string(nextBranch, branchOffRate) + "[CB]" + nextBranch));
+            new string(nextBranch, branchOffRate) + "[CB]" + nextBranch));
 
 
     }
+
+    public void UpdateRules()
+    {
+        rules = new List<Rule>();
+        rules.Add(new Rule("AB", "AAB"));
+        AddBranchRule('A', 'C', previousSections, growthRateNominator, growthRateDenominator, branchOffRate);
+        StepBack();
+        StepForward();
+        branchRenderer.RenderTree();
+    }
+
 }
 
 [Serializable]
