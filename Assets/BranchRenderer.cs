@@ -10,17 +10,13 @@ public class BranchRenderer : MonoBehaviour
     public float indicatorWidth = .2f;
     MVCLSystem lSystem;
     SketchBranchModel sketchBranchModel;
-    int step = 0;
     LineRenderer currentLineRenderer;
     Dictionary<char, List<int>> branchSectionCounter = new Dictionary<char, List<int>>();
     Dictionary<char, List<LineRenderer>> renderedBranches = new Dictionary<char, List<LineRenderer>>();
     List<Vector3> savedPositions = new List<Vector3>();
-    public List<int> timesBranchedOff = new List<int>();
     SketchBranchView sketchedBranchView;
-    bool rotateBranch = false;
+    bool branchedOff = false;
     GameObject initalLineRenderer;
-    int rotateCounter = 0;
-  
     // Start is called before the first frame update
     void Start()
     {
@@ -30,7 +26,6 @@ public class BranchRenderer : MonoBehaviour
         renderedBranches = new Dictionary<char, List<LineRenderer>>();
         branchSectionCounter = new Dictionary<char, List<int>>();
         savedPositions.Add(Vector3.zero);
-        timesBranchedOff.Add(-1);
 
     }
     void InitNewLineRenderer(char letter)
@@ -67,6 +62,7 @@ public class BranchRenderer : MonoBehaviour
             {
                 newLineRenderer.transform.parent = transform;
                 initalLineRenderer = newLineRenderer.gameObject;
+                newLineRenderer.gameObject.GetComponent<RotationController>().branchedOff=-1;
             }
             else
             {
@@ -98,9 +94,6 @@ public class BranchRenderer : MonoBehaviour
         savedPositions.Add(Vector3.zero);
         renderedBranches = new Dictionary<char, List<LineRenderer>>();
         branchSectionCounter = new Dictionary<char, List<int>>();
-        timesBranchedOff = new List<int>();
-        timesBranchedOff.Add(-1);
-        //degreeCounter = -1;
         initalLineRenderer = null;
         foreach (GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
         {
@@ -120,8 +113,9 @@ public class BranchRenderer : MonoBehaviour
                 case '[':
 
 
-                    rotateBranch = true;
+                    branchedOff = true;
                     savedPositions.Add(turtle.transform.position);
+                    currentLineRenderer.GetComponent<RotationController>().branchedOff++;
 
                     foreach (char key in keys)
                     {
@@ -140,11 +134,11 @@ public class BranchRenderer : MonoBehaviour
                         branchSectionCounter[key].Remove(branchSectionCounter[key].Last());
 
                     }
-                    timesBranchedOff.Remove(timesBranchedOff.Last());
+                    
                     break;
                 default:
                     RenderSection(currentAxiom[axiomCounter]);
-                    rotateBranch = false;
+                    branchedOff = false;
                     break;
             }
             axiomCounter++;
@@ -161,6 +155,13 @@ public class BranchRenderer : MonoBehaviour
     }
     void RenderSection(char letter)
     {
+        int parentBranches = 0;
+        if (currentLineRenderer != null)
+        {
+            parentBranches = currentLineRenderer.GetComponent<RotationController>().branchedOff;
+
+        }
+
         //Debug.Log("Rendering Section");
         if (!branchSectionCounter.ContainsKey(letter))
         {
@@ -185,19 +186,11 @@ public class BranchRenderer : MonoBehaviour
         //turtle.transform.rotation = diffRotation * turtle.transform.rotation;
         turtle.transform.rotation = Quaternion.identity;
         Quaternion drawingRotation = currentLineRenderer.transform.rotation * GetRotation(drawingDistance);
-
-
-        if (rotateBranch)
+        if (branchedOff)
         {
-            //Debug.Log("rotating branch");
-            //rotate
-            //currentLineRenderer.transform.Rotate(Vector3.up, 137 * timesBranchedOff.Last());
-            timesBranchedOff[timesBranchedOff.Count - 1]++;
-            currentLineRenderer.GetComponent<RotationController>().branchedOff= timesBranchedOff[timesBranchedOff.Count - 1];
+            currentLineRenderer.GetComponent<RotationController>().branchNumber= parentBranches;
             
 
-            timesBranchedOff.Add(0);
-            //turtle.transform.rotation = Quaternion.Euler(0, 0, 137 * timesBranchedOff.Last()) * turtle.transform.rotation;
         }
         //Look at target
         turtle.transform.rotation = drawingRotation * turtle.transform.rotation;
@@ -271,7 +264,6 @@ public class BranchRenderer : MonoBehaviour
         {
             branch.transform.rotation = Quaternion.identity;
         }
-        rotateCounter = 0;
     }
     public void UpdateBranchRotation()
     {
@@ -280,5 +272,20 @@ public class BranchRenderer : MonoBehaviour
             RotationController rotationController= branch.GetComponent<RotationController>();
             rotationController.UpdateBranchRotation();
         }
+    }
+
+    public void ResetTree()
+    {
+        foreach (GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
+        {
+            Destroy(branch);
+        }
+        Reset();
+
+
+    }
+    private void Reset()
+    {
+        
     }
 }

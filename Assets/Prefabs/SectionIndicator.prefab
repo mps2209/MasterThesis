@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: -8486844333990347342}
   m_Layer: 0
   m_Name: SectionIndicator
-  m_TagString: Untagged
+  m_TagString: Node
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -216,5 +216,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   letter: 0
   index: 0
-  activeColor: {r: 0.5518868, g: 0.9873555, b: 1, a: 0}
-  inactiveColor: {r: 0.13218175, g: 0.013883919, b: 0.9811321, a: 0}
+  activeColor: {r: 0, g: 0, b: 0, a: 0}
+  inactiveColor: {r: 0, g: 0, b: 0, a: 0}

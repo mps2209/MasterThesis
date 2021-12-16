@@ -12,7 +12,7 @@ public class SketchBranchView : MonoBehaviour
     public float indicatorWidth = .2f;
     public GameObject interactableNodePrefab;
     LineRenderer lineRendererIndicator;
-    public Dictionary<char, LineRenderer> sketchedBranches = new Dictionary<char, LineRenderer>();
+    public Dictionary<char, LineRenderer> sketchedBranches;
     SketchingPlatformController platformController;
     MVCInputController inputController;
     MVCLSystem lSystem;
@@ -20,7 +20,7 @@ public class SketchBranchView : MonoBehaviour
     GameObject rightController;
     Vector3 startingPoint = Vector3.zero;
     [SerializeField]
-    SketchedBranchNode selectedNode = new SketchedBranchNode(0, 'A');
+    SketchedBranchNode selectedNode;
     // Start is called before the first frame update
     void Start()
     {
@@ -28,12 +28,35 @@ public class SketchBranchView : MonoBehaviour
         inputController = GameObject.FindGameObjectWithTag("GameController").GetComponent<MVCInputController>();
         lSystem = GameObject.Find("LSystem").GetComponent<MVCLSystem>();
         rightController = GameObject.Find("RightHand Controller");
+        sketchedBranches = new Dictionary<char, LineRenderer>();
+        selectedNode = new SketchedBranchNode(0, 'A');
+        InitSketchBranchView();
+    }
+    public void InitSketchBranchView()
+    {
+        if (sketchedBranches != null) { }
+        char[] keys = new char[sketchedBranches.Count];
+            
+        sketchedBranches.Keys.CopyTo(keys,0);
+        foreach(char key in keys)
+        {
+            Destroy(sketchedBranches[key]);
+        }
+        foreach(GameObject node in GameObject.FindGameObjectsWithTag("Node"))
+        {
+            Destroy(node);
+        }
+        sketchedBranches = new Dictionary<char, LineRenderer>();
+        selectedNode = new SketchedBranchNode(0, 'A');
         InitIndicatorLineRenderer();
         InitSketchedBranch(selectedNode.letter, transform.position);
     }
-
     void InitIndicatorLineRenderer()
     {
+        if (lineRendererIndicator != null)
+        {
+            Destroy(lineRendererIndicator);
+        }
         lineRendererIndicator = new GameObject().AddComponent<LineRenderer>().GetComponent<LineRenderer>();
         lineRendererIndicator.gameObject.name = "LRIndicator";
         lineRendererIndicator.material = lineRendererIndicatorMaterial;

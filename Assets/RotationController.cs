@@ -5,6 +5,7 @@ using UnityEngine;
 public class RotationController : MonoBehaviour
 {
     public int branchedOff=0;
+    public int branchNumber=0;
     // Start is called before the first frame update
     void Start()
     {
@@ -17,7 +18,7 @@ public class RotationController : MonoBehaviour
     }
     public void UpdateBranchRotation()
     {
-        transform.Rotate(0, 137 * branchedOff, 0);
+        transform.Rotate(0, 137 * branchNumber, 0);
     }
 
 

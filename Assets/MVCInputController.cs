@@ -75,4 +75,15 @@ public class MVCInputController : MonoBehaviour
             branchRenderer.RenderTree();
         }
     }
+    public void ResetTree()
+    {
+        while (lSystem.Step() > 1)
+        {
+            lSystem.StepBack();
+
+        }
+        sketchBranchView.InitSketchBranchView();
+        branchRenderer.ResetTree();
+
+    }
 }
