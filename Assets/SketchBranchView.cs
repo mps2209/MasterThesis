@@ -6,6 +6,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 
 public class SketchBranchView : MonoBehaviour
 {
+    public GameObject nextSectionIndicator;
 
     public Material lineRendererIndicatorMaterial;
     public Color lineRendererIndicatorColor;
@@ -32,17 +33,48 @@ public class SketchBranchView : MonoBehaviour
         selectedNode = new SketchedBranchNode(0, 'A');
         InitSketchBranchView();
     }
+
+    void Update()
+    {
+        nextSectionIndicator.transform.position = rightController.transform.position;
+        if (!inputController.PlatFormGrabbed())
+        {
+            if (selectedNode.index < sketchedBranches[selectedNode.letter].positionCount)
+            {
+                lineRendererIndicator.gameObject.transform.position = sketchedBranches[selectedNode.letter].gameObject.transform.position;
+
+                lineRendererIndicator.SetPosition(0, sketchedBranches[selectedNode.letter].GetPosition(selectedNode.index));
+
+            }
+            else
+            {
+                lineRendererIndicator.gameObject.transform.position = sketchedBranches[selectedNode.letter].gameObject.transform.position;
+
+                lineRendererIndicator.SetPosition(0, sketchedBranches[selectedNode.letter].GetPosition(sketchedBranches[selectedNode.letter].positionCount - 1));
+            }
+
+            lineRendererIndicator.SetPosition(1, nextSectionIndicator.transform.localPosition-sketchedBranches[selectedNode.letter].transform.localPosition);
+
+        }
+        else
+        {
+            lineRendererIndicator.SetPosition(0, Vector3.zero);
+
+            lineRendererIndicator.SetPosition(1, Vector3.zero);
+
+        }
+    }
     public void InitSketchBranchView()
     {
         if (sketchedBranches != null) { }
         char[] keys = new char[sketchedBranches.Count];
-            
-        sketchedBranches.Keys.CopyTo(keys,0);
-        foreach(char key in keys)
+
+        sketchedBranches.Keys.CopyTo(keys, 0);
+        foreach (char key in keys)
         {
             Destroy(sketchedBranches[key]);
         }
-        foreach(GameObject node in GameObject.FindGameObjectsWithTag("Node"))
+        foreach (GameObject node in GameObject.FindGameObjectsWithTag("Node"))
         {
             Destroy(node);
         }
@@ -59,6 +91,7 @@ public class SketchBranchView : MonoBehaviour
         }
         lineRendererIndicator = new GameObject().AddComponent<LineRenderer>().GetComponent<LineRenderer>();
         lineRendererIndicator.gameObject.name = "LRIndicator";
+        lineRendererIndicator.transform.localScale = new Vector3(1f, 1f, 1f);
         lineRendererIndicator.material = lineRendererIndicatorMaterial;
         lineRendererIndicator.material.color = lineRendererIndicatorColor;
         lineRendererIndicator.startWidth = indicatorWidth;
@@ -88,36 +121,7 @@ public class SketchBranchView : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
 
-        if (!inputController.PlatFormGrabbed())
-        {
-            if (selectedNode.index < sketchedBranches[selectedNode.letter].positionCount)
-            {
-                lineRendererIndicator.gameObject.transform.position = sketchedBranches[selectedNode.letter].gameObject.transform.position;
-
-                lineRendererIndicator.SetPosition(0, sketchedBranches[selectedNode.letter].GetPosition(selectedNode.index));
-
-            }
-            else
-            {
-                lineRendererIndicator.gameObject.transform.position = sketchedBranches[selectedNode.letter].gameObject.transform.position;
-
-                lineRendererIndicator.SetPosition(0, sketchedBranches[selectedNode.letter].GetPosition(sketchedBranches[selectedNode.letter].positionCount - 1));
-            }
-
-            lineRendererIndicator.SetPosition(1, rightController.transform.position - sketchedBranches[selectedNode.letter].gameObject.transform.position);
-
-        }
-        else
-        {
-            lineRendererIndicator.SetPosition(0, Vector3.zero);
-
-            lineRendererIndicator.SetPosition(1, Vector3.zero);
-
-        }
-    }
     public Vector3 GetCurrentDelta()
     {
         return lineRendererIndicator.GetPosition(1) - lineRendererIndicator.GetPosition(0);
@@ -152,7 +156,7 @@ public class SketchBranchView : MonoBehaviour
         selectedNode.index++;
 
         sketchedBranches[selectedNode.letter].positionCount++;
-        sketchedBranches[selectedNode.letter].SetPosition(sketchedBranches[selectedNode.letter].positionCount - 1, rightController.transform.position - sketchedBranches[selectedNode.letter].gameObject.transform.position);
+        sketchedBranches[selectedNode.letter].SetPosition(sketchedBranches[selectedNode.letter].positionCount - 1, nextSectionIndicator.transform.localPosition- sketchedBranches[selectedNode.letter].transform.localPosition);
         InstantiateNode();
         Debug.Log("AddToSketchedBranch " + selectedNode.letter + selectedNode.index);
 
@@ -160,8 +164,11 @@ public class SketchBranchView : MonoBehaviour
     }
     void InstantiateNode()
     {
-        GameObject interactableNode = Instantiate(interactableNodePrefab, rightController.transform.position, Quaternion.identity);
+        Vector3 localPosition = sketchedBranches[selectedNode.letter].GetPosition(sketchedBranches[selectedNode.letter].positionCount - 1);
+        GameObject interactableNode = Instantiate(interactableNodePrefab, Vector3.zero, Quaternion.identity);
         interactableNode.transform.parent = transform;
+        interactableNode.transform.localPosition = localPosition+ sketchedBranches[selectedNode.letter].transform.localPosition;
+        //transform.localPosition
         SketchedNodeModel nodeModel = interactableNode.GetComponent<SketchedNodeModel>();
         nodeModel.Index(selectedNode.index);
         nodeModel.Letter(selectedNode.letter);

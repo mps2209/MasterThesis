@@ -15,7 +15,8 @@ public class MVCInputController : MonoBehaviour
     SketchBranchView sketchBranchView;
     BranchRenderer branchRenderer;
     MVCLSystem lSystem;
-
+    public bool leftGrabPressed=false;
+    public bool rightGrabPressed = false;
     void Start()
     {
         sketchBranchController = GameObject.Find("SketchBranchController").GetComponent<SketchBranchController>();
@@ -42,6 +43,30 @@ public class MVCInputController : MonoBehaviour
                 //sketchBranchController.ConfirmBranchSection(sketchBranchView.GetCurrentDelta());
                 sketchBranchView.UpdateSketchedBranches();
             }
+        }
+    }
+    public void LeftGrabPressed(CallbackContext callbackContext)
+    {
+        float triggerPressed = callbackContext.ReadValue<float>();
+                leftGrabPressed = true;
+
+        if (triggerPressed == 0)
+        {
+            Debug.Log("TriggerPressed");
+            leftGrabPressed = false;
+
+        }
+    }
+    public void RightGrabPressed(CallbackContext callbackContext)
+    {
+        float triggerPressed = callbackContext.ReadValue<float>();
+        rightGrabPressed = true;
+
+        if (triggerPressed == 0)
+        {
+            Debug.Log("TriggerPressed");
+            rightGrabPressed = false;
+
         }
     }
     public void SetPlatFormGrabbed(bool isGrabbed)
