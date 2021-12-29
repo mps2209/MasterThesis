@@ -150,6 +150,14 @@ public class MVCLSystem : MonoBehaviour
         StepForward();
         branchRenderer.RenderTree();
     }
+    public void UpdateRulesNoBranch()
+    {
+        rules = new List<Rule>();
+        rules.Add(new Rule("AB", "AAB"));
+        StepBack();
+        StepForward();
+        branchRenderer.RenderTree();
+    }
 
 }
 

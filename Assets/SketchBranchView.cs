@@ -238,6 +238,7 @@ public class SketchBranchView : MonoBehaviour
             Debug.Log("Trying to destroy branch off node");
             Destroy(sketchedBranches['C'].gameObject);
             sketchedBranches.Remove('C');
+            lSystem.UpdateRulesNoBranch();
             if(sketchedNodeModel.Index() == branchOffNode.index)
             {
                 return;
