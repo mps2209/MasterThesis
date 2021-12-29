@@ -8,54 +8,93 @@ namespace Assets.Scripts
 
     public class SketchedNodeModel : MonoBehaviour
     {
-
+        public Color leftColor;
+        public Color inactiveColor;
+        public Color rightColor;
+        public float selectDelay = .5f;
         [SerializeField]
         char letter;
         [SerializeField]
         int index;
         Renderer renderer;
-        public Color activeColor;
-        public Color inactiveColor;
         SketchBranchView sketchBranchView;
+        MVCInputController inputController;
+        bool selected = false;
+        GameObject grabber;
+        Coroutine currentCoroutine;
         private void Start()
         {
-            sketchBranchView= GameObject.Find("SketchingPlatform").GetComponent<SketchBranchView>();
+            sketchBranchView = GameObject.Find("SketchingPlatform").GetComponent<SketchBranchView>();
             renderer = GetComponent<Renderer>();
+            renderer.material.color = inactiveColor;
 
-            inactiveColor = renderer.material.color;
-            activeColor = renderer.material.color;
         }
 
-
+        private void Update()
+        {
+            if (selected)
+            {
+                transform.position = grabber.transform.position;
+                sketchBranchView.UpdateNodePosition(this);
+            }
+        }
         public void SetMaterial(Material material)
         {
             renderer = GetComponent<Renderer>();
             renderer.material = material;
-            
-        }
-        public void SetColors(Color activeColor, Color inactiveColor)
-        {
-            this.activeColor = activeColor;
-            this.inactiveColor = inactiveColor;
-            renderer.material.SetColor("_Color", inactiveColor);
 
         }
+
 
         public void Selected(SelectEnterEventArgs selectEnterEventArgs)
         {
-            Debug.Log("selected Node"+ letter + index);
-
+            Debug.Log("selected Node" + letter + index);
+            grabber = selectEnterEventArgs.interactor.gameObject;
             sketchBranchView.SetSelectedNode(this);
+            currentCoroutine = StartCoroutine(SetSelected(true));
         }
-        public void HoverEnter(HoverEnterEventArgs selectEnterEventArgs)
+
+        public void LeftSelect(SelectEnterEventArgs selectEnterEventArgs)
         {
-            renderer.material.SetColor("_Color", activeColor);
+            Debug.Log("left selected Node" + letter + index);
+            DestroyNode();
+        }
+        IEnumerator SetSelected(bool selected)
+        {
+            yield return new WaitForSeconds(selectDelay);
+            this.selected = selected;
 
 
         }
-        public void HoverExxit(HoverExitEventArgs selectEnterEventArgs)
-        {
 
+        public void SelectExit(SelectExitEventArgs selectEnterEventArgs)
+        {
+            StopCoroutine(currentCoroutine);
+            selected = false;
+        }
+        public void RightHoverEnter(HoverEnterEventArgs selectEnterEventArgs)
+        {
+            Debug.Log("RightHoverEnter");
+            renderer.material.SetColor("_Color", rightColor);
+
+
+        }
+        public void RightHoverExit(HoverExitEventArgs selectEnterEventArgs)
+        {
+            Debug.Log("RightHoverExit");
+            renderer.material.SetColor("_Color", inactiveColor);
+
+        }
+        public void LeftHoverEnter(HoverEnterEventArgs selectEnterEventArgs)
+        {
+            Debug.Log("LeftHoverEnter");
+            renderer.material.SetColor("_Color", leftColor);
+
+
+        }
+        public void LeftHoverExit(HoverExitEventArgs selectEnterEventArgs)
+        {
+            Debug.Log("LeftHoverExit");
             renderer.material.SetColor("_Color", inactiveColor);
 
         }
@@ -69,11 +108,22 @@ namespace Assets.Scripts
         }
         public void Index(int index)
         {
-            this.index=index;
+            this.index = index;
         }
         public void Letter(char letter)
         {
             this.letter = letter;
+        }
+
+        public void DestroyNode()
+        {
+            sketchBranchView.DestroyNode(this);
+        }
+        public void Activate(ActivateEventArgs args)
+        {
+            Debug.Log("Activate");
+
+            DestroyNode();
         }
     }
 

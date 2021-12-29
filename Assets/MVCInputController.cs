@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit;
 using static UnityEngine.InputSystem.InputAction;
 
 public class MVCInputController : MonoBehaviour
@@ -18,6 +19,7 @@ public class MVCInputController : MonoBehaviour
     public bool rightSelectPressed;
     public bool leftSelectPressed;
 
+
     void Start()
     {
         sketchBranchController = GameObject.Find("SketchBranchController").GetComponent<SketchBranchController>();
@@ -26,15 +28,18 @@ public class MVCInputController : MonoBehaviour
         sketchBranchView = sketchingPlatform.GetComponent<SketchBranchView>();
         branchRenderer = treeRenderer.GetComponent<BranchRenderer>();
         lSystem = GameObject.Find("LSystem").GetComponent<MVCLSystem>();
+
     }
 
     // Update is called once per frame
     void Update()
     {
+
     }
 
     public void RightTriggerPressed(CallbackContext callbackContext)
     {
+
         float triggerPressed = callbackContext.ReadValue<float>();
         if (triggerPressed == 0)
         {
