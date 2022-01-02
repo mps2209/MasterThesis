@@ -48,7 +48,6 @@ namespace Assets.Scripts
 
         public void Selected(SelectEnterEventArgs selectEnterEventArgs)
         {
-            Debug.Log("selected Node" + letter + index);
             grabber = selectEnterEventArgs.interactor.gameObject;
             sketchBranchView.SetSelectedNode(this);
             currentCoroutine = StartCoroutine(SetSelected(true));
@@ -56,7 +55,6 @@ namespace Assets.Scripts
 
         public void LeftSelect(SelectEnterEventArgs selectEnterEventArgs)
         {
-            Debug.Log("left selected Node" + letter + index);
             DestroyNode();
         }
         IEnumerator SetSelected(bool selected)
@@ -74,27 +72,23 @@ namespace Assets.Scripts
         }
         public void RightHoverEnter(HoverEnterEventArgs selectEnterEventArgs)
         {
-            Debug.Log("RightHoverEnter");
             renderer.material.SetColor("_Color", rightColor);
 
 
         }
         public void RightHoverExit(HoverExitEventArgs selectEnterEventArgs)
         {
-            Debug.Log("RightHoverExit");
             renderer.material.SetColor("_Color", inactiveColor);
 
         }
         public void LeftHoverEnter(HoverEnterEventArgs selectEnterEventArgs)
         {
-            Debug.Log("LeftHoverEnter");
             renderer.material.SetColor("_Color", leftColor);
 
 
         }
         public void LeftHoverExit(HoverExitEventArgs selectEnterEventArgs)
         {
-            Debug.Log("LeftHoverExit");
             renderer.material.SetColor("_Color", inactiveColor);
 
         }
@@ -119,7 +113,7 @@ namespace Assets.Scripts
         {
             sketchBranchView.DestroyNode(this);
         }
-        public void Activate(ActivateEventArgs args)
+        public void LeftActivate(ActivateEventArgs args)
         {
             Debug.Log("Activate");
 

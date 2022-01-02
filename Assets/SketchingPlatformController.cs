@@ -11,6 +11,7 @@ public class SketchingPlatformController : MonoBehaviour
     GameObject grabber;
     Rigidbody rigidbody;
     MVCInputController inputController;
+    TutorialController tutorialController;
     // Start is called before the first frame update
     void Start()
     {
@@ -20,6 +21,7 @@ public class SketchingPlatformController : MonoBehaviour
         distanceToPlayer = yCorrection - transform.position;
         rigidbody = GetComponent<Rigidbody>();
         inputController = GameObject.FindGameObjectWithTag("GameController").GetComponent<MVCInputController>();
+        tutorialController = GameObject.Find("Tutorial").GetComponent<TutorialController>();
     }
 
     // Update is called once per frame
@@ -41,19 +43,21 @@ public class SketchingPlatformController : MonoBehaviour
 
     public void SelectEntered(SelectEnterEventArgs args)
     {
-        Debug.Log("SelectEntered");
         inputController.SetPlatFormGrabbed(true);
         grabber = args.interactor.gameObject;
         distanceToPlayer = grabber.transform.position - transform.position;
     }
     public void SelectExit(SelectExitEventArgs args)
     {
-        Debug.Log("SelectExit");
         inputController.SetPlatFormGrabbed(false);
         grabber = null;
         Vector3 yCorrection = player.transform.position;
         yCorrection.y = transform.position.y;
         distanceToPlayer = yCorrection - transform.position;
+        if (tutorialController.tutorialState == TutorialPoint.GrabPlatform)
+        {
+            tutorialController.AdvanceTutorial();
+        }
     }
 
 }

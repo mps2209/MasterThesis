@@ -16,7 +16,7 @@ public class SketchBranchView : MonoBehaviour
     SketchingPlatformController platformController;
     MVCInputController inputController;
     MVCLSystem lSystem;
-
+    TutorialController tutorialController;
     GameObject rightController;
     Vector3 startingPoint = Vector3.zero;
     [SerializeField]
@@ -25,6 +25,7 @@ public class SketchBranchView : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        tutorialController = GameObject.Find("Tutorial").GetComponent<TutorialController>();
         platformController = GetComponent<SketchingPlatformController>();
         inputController = GameObject.FindGameObjectWithTag("GameController").GetComponent<MVCInputController>();
         lSystem = GameObject.Find("LSystem").GetComponent<MVCLSystem>();
@@ -92,7 +93,7 @@ public class SketchBranchView : MonoBehaviour
     void Update()
     {
 
-        if (!inputController.PlatFormGrabbed())
+        if (!inputController.PlatFormGrabbed() && tutorialController.tutorialState!=TutorialPoint.GrabPlatform)
         {
             if (IsTip(selectedNode) || sketchedBranches.Count < 2)
             {
@@ -137,20 +138,24 @@ public class SketchBranchView : MonoBehaviour
 
     public void UpdateSketchedBranches()
     {
-        Debug.Log("UpdateSketchedBranches");
         if (selectedNode.index == sketchedBranches[selectedNode.letter].positionCount - 1)
         {
-            Debug.Log("index at tip");
-
+            if (tutorialController.tutorialState == TutorialPoint.AddTrunk)
+            {
+                tutorialController.AdvanceTutorial();
+            }
             AddToSketchedBranch();
         }
         else
         {
-            Debug.Log("index not at tip");
             if (sketchedBranches.ContainsKey('C'))
             {
                 //Not adding additional Branches
                 return;
+            }
+            if (tutorialController.tutorialState == TutorialPoint.AddBranch)
+            {
+                tutorialController.AdvanceTutorial();
             }
             AddNewBranch();
             AddToSketchedBranch();
@@ -165,7 +170,6 @@ public class SketchBranchView : MonoBehaviour
         sketchedBranches[selectedNode.letter].positionCount++;
         sketchedBranches[selectedNode.letter].SetPosition(sketchedBranches[selectedNode.letter].positionCount - 1, rightController.transform.position - sketchedBranches[selectedNode.letter].gameObject.transform.position);
         InstantiateNode();
-        Debug.Log("AddToSketchedBranch " + selectedNode.letter + selectedNode.index);
 
 
     }
@@ -176,22 +180,19 @@ public class SketchBranchView : MonoBehaviour
         SketchedNodeModel nodeModel = interactableNode.GetComponent<SketchedNodeModel>();
         nodeModel.Index(selectedNode.index);
         nodeModel.Letter(selectedNode.letter);
-        Debug.Log("Instantiating Node " + selectedNode.letter + selectedNode.index);
-        Debug.Log("Instantiated Node " + nodeModel.Letter() + nodeModel.Index());
+
     }
     void AddNewBranch()
     {
 
         if (selectedNode.letter != 'A')
         {
-            Debug.Log("Not Adding another Branch " + selectedNode.letter);
 
             //restricting to 1 branch for now
             return;
         }
         char newLetter = 'C';
         int newIndex = 0;
-        Debug.Log("AddNewBranch " + newLetter);
         InitSketchedBranch(newLetter, transform.position+sketchedBranches['A'].GetPosition(selectedNode.index));
         lSystem.AddBranchRule(selectedNode.letter, newLetter, selectedNode.index,1,3,3);
         branchOffNode = selectedNode;
@@ -201,7 +202,6 @@ public class SketchBranchView : MonoBehaviour
 
     public void SetSelectedNode(SketchedNodeModel nodeModel)
     {
-        Debug.Log("SetSelectedNode");
 
         
         selectedNode = new SketchedBranchNode(nodeModel.Index(), nodeModel.Letter());
@@ -217,6 +217,10 @@ public class SketchBranchView : MonoBehaviour
     }
     public void UpdateNodePosition(SketchedNodeModel sketchedNodeModel)
     {
+        if (tutorialController.tutorialState == TutorialPoint.MoveSection)
+        {
+            tutorialController.AdvanceTutorial();
+        }
 
         this.sketchedBranches[sketchedNodeModel.Letter()].SetPosition(sketchedNodeModel.Index(), sketchedNodeModel.transform.position - sketchedBranches[selectedNode.letter].gameObject.transform.position);
         if (branchOffNode != null)
@@ -230,7 +234,10 @@ public class SketchBranchView : MonoBehaviour
     public void DestroyNode(SketchedNodeModel sketchedNodeModel)
     {
         SetSelectedNode(sketchedNodeModel);
-
+        if (tutorialController.tutorialState == TutorialPoint.DeleteSection)
+        {
+            tutorialController.AdvanceTutorial();
+        }
         Debug.Log("Trying to destroy node "+ sketchedNodeModel.Letter()+sketchedNodeModel.Index());
 
         if (branchOffNode!=null && sketchedNodeModel.Letter() == branchOffNode.letter && sketchedNodeModel.Index() <= branchOffNode.index)

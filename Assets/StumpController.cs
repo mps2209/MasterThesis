@@ -64,12 +64,12 @@ public class StumpController : MonoBehaviour
 
     public void SelectEntered(SelectEnterEventArgs args)
     {
+
         Debug.Log("Stump SelectEntered");
         inputController.ResetTree();
     }
     public void HoverEnter(HoverEnterEventArgs args)
     {
-        Debug.Log("Stump HoverEnter");
 
         Material[] matArray = stumpRenderer.materials;
         matArray[0] = stumpEmmisionMaterial;
@@ -81,7 +81,6 @@ public class StumpController : MonoBehaviour
     }
     public void HoverExit(HoverExitEventArgs args)
     {
-        Debug.Log("Stump HoverExit");
 
         Material[] matArray = stumpRenderer.materials;
         matArray[0] = stumpNormalMaterial;
