@@ -9,8 +9,8 @@ public class BranchRenderer : MonoBehaviour
     public Material lineRendererMaterial;
     public Color lineRendererColor;
     public float indicatorWidth = .2f;
-    public float turtleScale=1f;
-    public float rotationAngle=137f;
+    public float turtleScale = 1f;
+    public float rotationAngle = 137f;
     public GameObject leafPrefab;
     MVCLSystem lSystem;
     SketchBranchModel sketchBranchModel;
@@ -52,13 +52,14 @@ public class BranchRenderer : MonoBehaviour
             newLineRenderer.transform.position = transform.position;
 
         }
-        else {
+        else
+        {
             newLineRenderer.transform.position = savedPositions.Last();
         }
         newLineRenderer.gameObject.AddComponent<RotationController>();
 
         newLineRenderer.SetPosition(0, Vector3.zero);
-        if(renderedBranches.ContainsKey(letter) && renderedBranches[letter].Count>0)
+        if (renderedBranches.ContainsKey(letter) && renderedBranches[letter].Count > 0)
         {
             newLineRenderer.transform.parent = renderedBranches[letter].Last().transform;
         }
@@ -68,7 +69,7 @@ public class BranchRenderer : MonoBehaviour
             {
                 newLineRenderer.transform.parent = transform;
                 initalLineRenderer = newLineRenderer.gameObject;
-                newLineRenderer.gameObject.GetComponent<RotationController>().branchedOff=-1;
+                newLineRenderer.gameObject.GetComponent<RotationController>().branchedOff = -1;
             }
             else
             {
@@ -144,7 +145,7 @@ public class BranchRenderer : MonoBehaviour
                         branchSectionCounter[key].Remove(branchSectionCounter[key].Last());
 
                     }
-                    
+
                     break;
                 default:
                     RenderSection(currentAxiom[axiomCounter]);
@@ -155,7 +156,7 @@ public class BranchRenderer : MonoBehaviour
         }
         CleanUpTree();
         UpdateBranchRotation();
-        AddLeafes();
+        //AddLeafes();
     }
 
     void CleanUpTree()
@@ -174,10 +175,10 @@ public class BranchRenderer : MonoBehaviour
         foreach (GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
         {
             LineRenderer branchRenderer = branch.GetComponent<LineRenderer>();
-            
-            GameObject leaf= Instantiate(leafPrefab, branchRenderer.transform.position, Quaternion.identity);
+
+            GameObject leaf = Instantiate(leafPrefab, branchRenderer.transform.position, Quaternion.identity);
             leaf.transform.parent = branchRenderer.transform;
-            leaf.transform.localPosition= branchRenderer.GetPosition(branchRenderer.positionCount - 1);
+            leaf.transform.localPosition = branchRenderer.GetPosition(branchRenderer.positionCount - 1);
 
         }
 
@@ -207,7 +208,7 @@ public class BranchRenderer : MonoBehaviour
         // this could fix rotating branches trying without first
         //turtle.transform.parent = currentLineRenderer.transform;
         Vector3 drawingDistance = GetDistance(letter, branchSectionCounter[letter].Last());
-        
+
         //SketchedBranchSection currentBranchSection = new SketchedBranchSection(branchSectionCounter[letter].Last(), letter, drawingDistance.magnitude, drawingRotation);
 
         //turtle.transform.rotation = Quaternion.identity;
@@ -217,28 +218,43 @@ public class BranchRenderer : MonoBehaviour
         Quaternion drawingRotation = currentLineRenderer.transform.rotation * GetRotation(drawingDistance);
         if (branchedOff)
         {
-            currentLineRenderer.GetComponent<RotationController>().branchNumber= parentBranches;
-            
+            currentLineRenderer.GetComponent<RotationController>().branchNumber = parentBranches;
+
 
         }
         //Look at target
         turtle.transform.rotation = drawingRotation * turtle.transform.rotation;
-        turtle.transform.position += turtle.transform.forward * drawingDistance.magnitude*turtleScale;
+        turtle.transform.position += turtle.transform.forward * drawingDistance.magnitude * turtleScale;
         currentLineRenderer.positionCount++;
-        currentLineRenderer.SetPosition(currentLineRenderer.positionCount - 1, turtle.transform.position- currentLineRenderer.transform.position);
+        currentLineRenderer.SetPosition(currentLineRenderer.positionCount - 1, turtle.transform.position - currentLineRenderer.transform.position);
         branchSectionCounter[letter][branchSectionCounter[letter].Count - 1]++;
 
     }
 
     Vector3 GetDistance(char letter, int index)
     {
-        LineRenderer branchRenderer = sketchedBranchView.sketchedBranches[letter];
+        try
+        {
 
-        index = index % (branchRenderer.positionCount - 1);
+
+            LineRenderer branchRenderer = sketchedBranchView.sketchedBranches[letter];
+            
+            if(branchRenderer.positionCount - 1 <= 0)
+            {
+                return Vector3.zero;
+            }
+            index = index % (branchRenderer.positionCount - 1);
 
 
-        return branchRenderer.GetPosition(index + 1) - branchRenderer.GetPosition(index);
+            return branchRenderer.GetPosition(index + 1) - branchRenderer.GetPosition(index);
+        }
+        catch (KeyNotFoundException)
+        {
+            Debug.Log("Didnt find entry for " + letter);
 
+            return Vector3.zero;
+
+        }
     }
     Quaternion GetRotation(Vector3 delta)
     {
@@ -298,7 +314,7 @@ public class BranchRenderer : MonoBehaviour
     {
         foreach (GameObject branch in GameObject.FindGameObjectsWithTag("Branch"))
         {
-            RotationController rotationController= branch.GetComponent<RotationController>();
+            RotationController rotationController = branch.GetComponent<RotationController>();
             rotationController.UpdateBranchRotation(rotationAngle);
         }
     }
@@ -315,6 +331,6 @@ public class BranchRenderer : MonoBehaviour
     }
     private void Reset()
     {
-        
+
     }
 }

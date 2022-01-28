@@ -9,6 +9,9 @@ public class SketchBranchView : MonoBehaviour
 
     public Material lineRendererIndicatorMaterial;
     public Color lineRendererIndicatorColor;
+    public Color trunkColor;
+    public Color branchColor;
+
     public float indicatorWidth = .2f;
     public GameObject interactableNodePrefab;
     LineRenderer lineRendererIndicator;
@@ -25,7 +28,6 @@ public class SketchBranchView : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        tutorialController = GameObject.Find("Tutorial").GetComponent<TutorialController>();
         platformController = GetComponent<SketchingPlatformController>();
         inputController = GameObject.FindGameObjectWithTag("GameController").GetComponent<MVCInputController>();
         lSystem = GameObject.Find("LSystem").GetComponent<MVCLSystem>();
@@ -33,6 +35,8 @@ public class SketchBranchView : MonoBehaviour
         sketchedBranches = new Dictionary<char, LineRenderer>();
         selectedNode = new SketchedBranchNode(0, 'A');
         InitSketchBranchView();
+        tutorialController = GameObject.Find("Tutorial").GetComponent<TutorialController>();
+
     }
     public void InitSketchBranchView()
     {
@@ -51,7 +55,7 @@ public class SketchBranchView : MonoBehaviour
         sketchedBranches = new Dictionary<char, LineRenderer>();
         selectedNode = new SketchedBranchNode(0, 'A');
         InitIndicatorLineRenderer();
-        InitSketchedBranch(selectedNode.letter, transform.position);
+        InitSketchedBranch(selectedNode.letter, transform.position,false);
     }
     void InitIndicatorLineRenderer()
     {
@@ -72,12 +76,20 @@ public class SketchBranchView : MonoBehaviour
         lineRendererIndicator.SetPosition(0, Vector3.zero);
         lineRendererIndicator.SetPosition(1, Vector3.zero);
     }
-    void InitSketchedBranch(char letter, Vector3 position)
+    void InitSketchedBranch(char letter, Vector3 position,bool branch)
     {
         LineRenderer sketchedBranch = new GameObject().AddComponent<LineRenderer>().GetComponent<LineRenderer>();
         sketchedBranch.gameObject.name = "Branch" + letter;
         sketchedBranch.material = lineRendererIndicatorMaterial;
-        sketchedBranch.material.color = Random.ColorHSV();
+        if (branch)
+        {
+            sketchedBranch.material.SetColor("_Color", branchColor);
+        }
+        else
+        {
+            sketchedBranch.material.SetColor("_Color", trunkColor);
+
+        }
         sketchedBranch.startWidth = indicatorWidth;
         sketchedBranch.endWidth = indicatorWidth;
         sketchedBranch.positionCount = 1;
@@ -92,8 +104,20 @@ public class SketchBranchView : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-
-        if (!inputController.PlatFormGrabbed() && tutorialController.tutorialState!=TutorialPoint.GrabPlatform)
+        bool hideIndicator = false;
+        if (inputController.PlatFormGrabbed())
+        {
+            hideIndicator = true;
+        }
+        if (inputController.activateTutorial)
+        {
+             if(tutorialController.tutorialState == TutorialPoint.GrabPlatform)
+            {
+                hideIndicator = true;
+            }
+          
+        }
+        if (!hideIndicator)
         {
             if (IsTip(selectedNode) || sketchedBranches.Count < 2)
             {
@@ -140,10 +164,14 @@ public class SketchBranchView : MonoBehaviour
     {
         if (selectedNode.index == sketchedBranches[selectedNode.letter].positionCount - 1)
         {
-            if (tutorialController.tutorialState == TutorialPoint.AddTrunk)
+            if (inputController.activateTutorial)
             {
-                tutorialController.AdvanceTutorial();
+                if (tutorialController.tutorialState == TutorialPoint.AddTrunk)
+                {
+                    tutorialController.AdvanceTutorial();
+                }
             }
+
             AddToSketchedBranch();
         }
         else
@@ -153,10 +181,14 @@ public class SketchBranchView : MonoBehaviour
                 //Not adding additional Branches
                 return;
             }
-            if (tutorialController.tutorialState == TutorialPoint.AddBranch)
+            if (inputController.activateTutorial)
             {
-                tutorialController.AdvanceTutorial();
+                if (tutorialController.tutorialState == TutorialPoint.AddBranch)
+                {
+                    tutorialController.AdvanceTutorial();
+                }
             }
+
             AddNewBranch();
             AddToSketchedBranch();
         }
@@ -180,6 +212,7 @@ public class SketchBranchView : MonoBehaviour
         SketchedNodeModel nodeModel = interactableNode.GetComponent<SketchedNodeModel>();
         nodeModel.Index(selectedNode.index);
         nodeModel.Letter(selectedNode.letter);
+        interactableNode.name = selectedNode.letter + selectedNode.index.ToString()+ "InteractableNode";
 
     }
     void AddNewBranch()
@@ -193,13 +226,17 @@ public class SketchBranchView : MonoBehaviour
         }
         char newLetter = 'C';
         int newIndex = 0;
-        InitSketchedBranch(newLetter, transform.position+sketchedBranches['A'].GetPosition(selectedNode.index));
-        lSystem.AddBranchRule(selectedNode.letter, newLetter, selectedNode.index,1,3,3);
+        InitSketchedBranch(newLetter, transform.position+sketchedBranches['A'].GetPosition(selectedNode.index),true);
+        lSystem.AddBranchRule(selectedNode.letter, newLetter, selectedNode.index, selectedNode.index,1, 3,3);
         branchOffNode = selectedNode;
-
+        ToggleBranchOffNode(true);
         selectedNode = new SketchedBranchNode(newIndex, newLetter);
     }
+    void ToggleBranchOffNode(bool branchOff)
+    {
+        GameObject.Find(branchOffNode.letter + branchOffNode.index.ToString() + "InteractableNode").GetComponent<SketchedNodeModel>().SetBranchOffNode(branchOff);
 
+    }
     public void SetSelectedNode(SketchedNodeModel nodeModel)
     {
 
@@ -217,10 +254,14 @@ public class SketchBranchView : MonoBehaviour
     }
     public void UpdateNodePosition(SketchedNodeModel sketchedNodeModel)
     {
-        if (tutorialController.tutorialState == TutorialPoint.MoveSection)
+        if (inputController.activateTutorial)
         {
-            tutorialController.AdvanceTutorial();
+            if (tutorialController.tutorialState == TutorialPoint.MoveSection)
+            {
+                tutorialController.AdvanceTutorial();
+            }
         }
+
 
         this.sketchedBranches[sketchedNodeModel.Letter()].SetPosition(sketchedNodeModel.Index(), sketchedNodeModel.transform.position - sketchedBranches[selectedNode.letter].gameObject.transform.position);
         if (branchOffNode != null)
@@ -234,9 +275,12 @@ public class SketchBranchView : MonoBehaviour
     public void DestroyNode(SketchedNodeModel sketchedNodeModel)
     {
         SetSelectedNode(sketchedNodeModel);
-        if (tutorialController.tutorialState == TutorialPoint.DeleteSection)
+        if (inputController.activateTutorial)
         {
-            tutorialController.AdvanceTutorial();
+            if (tutorialController.tutorialState == TutorialPoint.DeleteSection)
+            {
+                tutorialController.AdvanceTutorial();
+            }
         }
         Debug.Log("Trying to destroy node "+ sketchedNodeModel.Letter()+sketchedNodeModel.Index());
 
@@ -246,10 +290,15 @@ public class SketchBranchView : MonoBehaviour
             Destroy(sketchedBranches['C'].gameObject);
             sketchedBranches.Remove('C');
             lSystem.UpdateRulesNoBranch();
-            if(sketchedNodeModel.Index() == branchOffNode.index)
-            {
+            if(sketchedNodeModel.Index() == branchOffNode.index) { 
+
+                ToggleBranchOffNode(false);
+
+                branchOffNode = null;
                 return;
             }
+            ToggleBranchOffNode(false);
+
             branchOffNode = null;
 
         }

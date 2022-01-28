@@ -6,15 +6,19 @@ using UnityEngine.XR.Interaction.Toolkit;
 public class SketchingPlatformController : MonoBehaviour
 {
 
+
     GameObject player;
     Vector3 distanceToPlayer;
     GameObject grabber;
     Rigidbody rigidbody;
     MVCInputController inputController;
     TutorialController tutorialController;
+
     // Start is called before the first frame update
     void Start()
     {
+
+
         player = GameObject.FindGameObjectWithTag("MainCamera");
         Vector3 yCorrection = player.transform.position;
         yCorrection.y = transform.position.y;
@@ -27,6 +31,7 @@ public class SketchingPlatformController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         if (inputController.PlatFormGrabbed())
         {
             rigidbody.MovePosition(grabber.transform.position - distanceToPlayer);
@@ -54,10 +59,14 @@ public class SketchingPlatformController : MonoBehaviour
         Vector3 yCorrection = player.transform.position;
         yCorrection.y = transform.position.y;
         distanceToPlayer = yCorrection - transform.position;
-        if (tutorialController.tutorialState == TutorialPoint.GrabPlatform)
+        if (inputController.activateTutorial)
         {
-            tutorialController.AdvanceTutorial();
+            if (tutorialController.tutorialState == TutorialPoint.GrabPlatform)
+            {
+                tutorialController.AdvanceTutorial();
+            }
         }
+
     }
 
 }

@@ -6,6 +6,7 @@ using static UnityEngine.InputSystem.InputAction;
 using System.Linq;
 public class MVCInputController : MonoBehaviour
 {
+    public bool activateTutorial;
     SketchBranchController sketchBranchController;
     public GameObject treeRenderer;
     // Start is called before the first frame update
@@ -22,13 +23,13 @@ public class MVCInputController : MonoBehaviour
 
     void Start()
     {
-        tutorialController = GameObject.Find("Tutorial").GetComponent<TutorialController>();
         sketchBranchController = GameObject.Find("SketchBranchController").GetComponent<SketchBranchController>();
         rightController = GameObject.Find("RightHand Controller").GetComponent<XRRayInteractor>();
         leftController = GameObject.Find("LeftHand Controller");
         sketchBranchView = sketchingPlatform.GetComponent<SketchBranchView>();
         branchRenderer = treeRenderer.GetComponent<BranchRenderer>();
         lSystem = GameObject.Find("LSystem").GetComponent<MVCLSystem>();
+        tutorialController = GameObject.Find("Tutorial").GetComponent<TutorialController>();
 
     }
 
@@ -37,7 +38,11 @@ public class MVCInputController : MonoBehaviour
     {
 
     }
+    public void toggleTutorial(bool value)
+    {
+        tutorialController.gameObject.SetActive(value);
 
+    }
     public void RightTriggerPressed(CallbackContext callbackContext)
     {
 
@@ -46,7 +51,7 @@ public class MVCInputController : MonoBehaviour
         {
             if (!platFormIsGrabbed && !CheckIfHoverTargets())
             {
-               
+
                 //sketchBranchController.ConfirmBranchSection(sketchBranchView.GetCurrentDelta());
                 sketchBranchView.UpdateSketchedBranches();
             }
@@ -73,10 +78,14 @@ public class MVCInputController : MonoBehaviour
         float buttonPressed = callbackContext.ReadValue<float>();
         if (buttonPressed == 0)
         {
-            if (tutorialController.tutorialState == TutorialPoint.AdvanceTree)
+            if (activateTutorial)
             {
-                tutorialController.AdvanceTutorial();
+                if (tutorialController.tutorialState == TutorialPoint.AdvanceTree)
+                {
+                    tutorialController.AdvanceTutorial();
+                }
             }
+
             lSystem.StepForward();
 
             branchRenderer.RenderTree();
@@ -88,28 +97,43 @@ public class MVCInputController : MonoBehaviour
         if (buttonPressed == 0)
         {
             Debug.Log("Stepping Backward");
-            if (tutorialController.tutorialState == TutorialPoint.StepBackTree)
+            if (activateTutorial)
             {
-                tutorialController.AdvanceTutorial();
+                if (tutorialController.tutorialState == TutorialPoint.StepBackTree)
+                {
+                    tutorialController.AdvanceTutorial();
+                }
             }
-            lSystem.StepBack();
+
+            lSystem.StepTo(-1);
 
             branchRenderer.RenderTree();
         }
     }
     public void ResetTree()
     {
-        if (tutorialController.tutorialState == TutorialPoint.ResetTree)
+        if (activateTutorial)
         {
-            tutorialController.AdvanceTutorial();
+            if (tutorialController.tutorialState == TutorialPoint.ResetTree)
+            {
+                tutorialController.AdvanceTutorial();
+            }
         }
-        while (lSystem.Step() > 1)
-        {
-            lSystem.StepBack();
 
-        }
+
+            lSystem.StepTo(-lSystem.step);
+
+        
         sketchBranchView.InitSketchBranchView();
         branchRenderer.ResetTree();
 
     }
+
+
+    public void StepTo(int stepTo)
+    {
+        lSystem.StepTo(stepTo);
+        branchRenderer.RenderTree();
+    }
+
 }

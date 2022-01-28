@@ -7,9 +7,11 @@ public class TutorialController : MonoBehaviour
     public TutorialPoint tutorialState = TutorialPoint.GrabPlatform;
     public List<GameObject> tutorialSteps;
     public Dictionary<TutorialPoint, GameObject> tutorialSetups;
+    BlinkController sketchingPlatformBlinkController;
     // Start is called before the first frame update
     void Start()
     {
+        sketchingPlatformBlinkController = GameObject.Find("SketchingPlatform").GetComponent<BlinkController>();
         tutorialSetups = new Dictionary<TutorialPoint, GameObject>();
         int i = 0;
         foreach(GameObject go in tutorialSteps)
@@ -39,7 +41,13 @@ public class TutorialController : MonoBehaviour
         int state = (int)tutorialState;
         state++;
         tutorialState = (TutorialPoint)state;
+        ResetTutorialSpecifics();
         SetupTutorial();
+    }
+    void ResetTutorialSpecifics()
+    {
+        sketchingPlatformBlinkController.StopBlink();
+
     }
     void SetupTutorial()
     {
@@ -58,8 +66,11 @@ public class TutorialController : MonoBehaviour
         switch (tutorialState)
         {
             case TutorialPoint.GrabPlatform:
+                sketchingPlatformBlinkController.StartBlink();
                 break;
             case TutorialPoint.AddTrunk:
+  
+
                 break;
             case TutorialPoint.MoveSection:
                 break;

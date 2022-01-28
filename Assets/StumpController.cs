@@ -31,6 +31,10 @@ public class StumpController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        InitStump();
+    }
+    public void InitStump()
+    {
         axeRenderer = axe.GetComponent<Renderer>();
         stumpRenderer = GetComponent<Renderer>();
         Material[] matArray = stumpRenderer.materials;
@@ -41,7 +45,6 @@ public class StumpController : MonoBehaviour
         inputController = GameObject.FindGameObjectWithTag("GameController").GetComponent<MVCInputController>();
         originalAxePosition = axe.transform.position;
     }
-
     // Update is called once per frame
     void Update()
     {
