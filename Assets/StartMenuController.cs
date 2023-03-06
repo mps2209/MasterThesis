@@ -50,4 +50,10 @@ public class StartMenuController : MonoBehaviour
         Debug.Log("ToggleImmersion");
         LevelController.skipTutorial = value;
     }
+
+    public void ChangeLang(int selected)
+    {
+        LevelController.language = (Language)selected;
+        Debug.Log("ChangedLanguageTo" + (Language)selected);
+    }
 }

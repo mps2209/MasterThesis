@@ -12,44 +12,61 @@ public class MVCInputController : MonoBehaviour
     // Start is called before the first frame update
     public GameObject sketchingPlatform;
     bool platFormIsGrabbed = false;
-    XRRayInteractor rightController;
-    GameObject leftController;
+    public XRBaseInteractor activeController;
     SketchBranchView sketchBranchView;
     BranchRenderer branchRenderer;
     MVCLSystem lSystem;
     public bool rightSelectPressed;
     public bool leftSelectPressed;
-    TutorialController tutorialController;
+    public TutorialController tutorialController;
+    public GameObject tutorialGerman;
+    public GameObject tutorialEnglish;
+
 
     void Start()
     {
+        activeController = GameObject.Find("RightHand Controller").GetComponent<XRBaseInteractor>();
         sketchBranchController = GameObject.Find("SketchBranchController").GetComponent<SketchBranchController>();
-        rightController = GameObject.Find("RightHand Controller").GetComponent<XRRayInteractor>();
-        leftController = GameObject.Find("LeftHand Controller");
         sketchBranchView = sketchingPlatform.GetComponent<SketchBranchView>();
         branchRenderer = treeRenderer.GetComponent<BranchRenderer>();
         lSystem = GameObject.Find("LSystem").GetComponent<MVCLSystem>();
-        tutorialController = GameObject.Find("Tutorial").GetComponent<TutorialController>();
+
 
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (activeController == null)
+        {
+            activeController = GameObject.Find("RightHand Controller").GetComponent<XRBaseInteractor>();
 
+        }
     }
     public void toggleTutorial(bool value)
     {
-        tutorialController.gameObject.SetActive(value);
+        switch (LevelController.language)
+        {
+            case Language.English:
+                tutorialEnglish.SetActive(value);
+                tutorialController = tutorialEnglish.GetComponent<TutorialController>();
+
+                break;
+            case Language.Deutsch:
+                tutorialGerman.SetActive(value);
+                tutorialController = tutorialGerman.GetComponent<TutorialController>();
+
+                break;
+        }
 
     }
     public void RightTriggerPressed(CallbackContext callbackContext)
     {
-
+        
         float triggerPressed = callbackContext.ReadValue<float>();
         if (triggerPressed == 0)
         {
-            if (!platFormIsGrabbed && !CheckIfHoverTargets())
+            if (!platFormIsGrabbed && !CheckIfHoveringOrSelected())
             {
 
                 //sketchBranchController.ConfirmBranchSection(sketchBranchView.GetCurrentDelta());
@@ -57,12 +74,11 @@ public class MVCInputController : MonoBehaviour
             }
         }
     }
-    bool CheckIfHoverTargets()
+    bool CheckIfHoveringOrSelected()
     {
         List<XRBaseInteractable> targets = new List<XRBaseInteractable>();
-
-        rightController.GetHoverTargets(targets);
-        return targets.Count > 0;
+        activeController.GetHoverTargets(targets);
+        return targets.Count > 0 || activeController.selectTarget!=null;
     }
     public void SetPlatFormGrabbed(bool isGrabbed)
     {

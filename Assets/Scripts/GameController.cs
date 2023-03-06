@@ -30,7 +30,7 @@ public class GameController : MonoBehaviour
             user.transform.position = userOffset;
             stump.GetComponent<StumpController>().InitStump();
         }
-        exampleTrees[LevelController.exampleTreeNr - 1].SetActive(true);
+        //exampleTrees[LevelController.exampleTreeNr - 1].SetActive(true);
 
     }
 

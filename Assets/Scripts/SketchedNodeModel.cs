@@ -24,19 +24,24 @@ namespace Assets.Scripts
         Coroutine currentCoroutine;
         bool isBranchOffNode = false;
         MVCLSystem lSystem;
+        MVCInputController inputController;
+        Transform initialParent;
         private void Start()
         {
             sketchBranchView = GameObject.Find("SketchingPlatform").GetComponent<SketchBranchView>();
             renderer = GetComponent<Renderer>();
             renderer.material.color = inactiveColor;
+            initialParent = transform.parent;
+            inputController = GameObject.FindGameObjectWithTag("GameController").GetComponent<MVCInputController>();
         }
 
         private void Update()
         {
             if (selected)
             {
-                transform.position = grabber.transform.position;
                 sketchBranchView.UpdateNodePosition(this);
+      
+
             }
         }
         public void SetMaterial(Material material)
@@ -49,47 +54,41 @@ namespace Assets.Scripts
 
         public void Selected(SelectEnterEventArgs selectEnterEventArgs)
         {
-            grabber = selectEnterEventArgs.interactor.gameObject;
             sketchBranchView.SetSelectedNode(this);
-            currentCoroutine = StartCoroutine(SetSelected(true));
+            inputController.activeController = selectEnterEventArgs.interactor;
+             currentCoroutine = StartCoroutine(SetSelected( selectEnterEventArgs.interactor.gameObject));
         }
 
-        public void LeftSelect(SelectEnterEventArgs selectEnterEventArgs)
+        public void Activate(ActivateEventArgs args)
         {
-            Debug.Log("Left Selected");
+            Debug.Log("Activated");
             DestroyNode();
         }
-        IEnumerator SetSelected(bool selected)
+        IEnumerator SetSelected(GameObject grabber)
         {
             yield return new WaitForSeconds(selectDelay);
-            this.selected = selected;
-
+            this.selected = true;
+            transform.parent = grabber.transform;
+            transform.localPosition = Vector3.zero;
 
         }
 
         public void SelectExit(SelectExitEventArgs selectEnterEventArgs)
         {
+
+
             StopCoroutine(currentCoroutine);
+            transform.parent = initialParent;
+
             selected = false;
         }
-        public void RightHoverEnter(HoverEnterEventArgs selectEnterEventArgs)
+        public void HoverEnter(HoverEnterEventArgs selectEnterEventArgs)
         {
             renderer.material.SetColor("_Color", rightColor);
 
 
         }
-        public void RightHoverExit(HoverExitEventArgs selectEnterEventArgs)
-        {
-            renderer.material.SetColor("_Color", inactiveColor);
-
-        }
-        public void LeftHoverEnter(HoverEnterEventArgs selectEnterEventArgs)
-        {
-            renderer.material.SetColor("_Color", leftColor);
-
-
-        }
-        public void LeftHoverExit(HoverExitEventArgs selectEnterEventArgs)
+        public void HoverExit(HoverExitEventArgs selectEnterEventArgs)
         {
             renderer.material.SetColor("_Color", inactiveColor);
 
@@ -115,19 +114,8 @@ namespace Assets.Scripts
         {
             sketchBranchView.DestroyNode(this);
         }
-        public void LeftActivate(ActivateEventArgs args)
-        {
-            Debug.Log("Left Activate");
 
-            DestroyNode();
-        }
-        public void RightActivate(ActivateEventArgs args)
-        {
-            Debug.Log("Right Activate");
-            grabber = args.interactor.gameObject;
-            sketchBranchView.SetSelectedNode(this);
-            currentCoroutine = StartCoroutine(SetSelected(true));
-        }
+
         public void SetBranchOffNode(bool branchOff)
         {
             /*

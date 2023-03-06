@@ -19,23 +19,21 @@ public class SketchBranchView : MonoBehaviour
     SketchingPlatformController platformController;
     MVCInputController inputController;
     MVCLSystem lSystem;
-    TutorialController tutorialController;
-    GameObject rightController;
     Vector3 startingPoint = Vector3.zero;
     [SerializeField]
     SketchedBranchNode selectedNode;
     SketchedBranchNode branchOffNode;
+
     // Start is called before the first frame update
     void Start()
     {
+        
         platformController = GetComponent<SketchingPlatformController>();
         inputController = GameObject.FindGameObjectWithTag("GameController").GetComponent<MVCInputController>();
         lSystem = GameObject.Find("LSystem").GetComponent<MVCLSystem>();
-        rightController = GameObject.Find("RightHand Controller");
         sketchedBranches = new Dictionary<char, LineRenderer>();
         selectedNode = new SketchedBranchNode(0, 'A');
         InitSketchBranchView();
-        tutorialController = GameObject.Find("Tutorial").GetComponent<TutorialController>();
 
     }
     public void InitSketchBranchView()
@@ -111,7 +109,7 @@ public class SketchBranchView : MonoBehaviour
         }
         if (inputController.activateTutorial)
         {
-             if(tutorialController.tutorialState == TutorialPoint.GrabPlatform)
+             if(inputController.tutorialController.tutorialState == TutorialPoint.GrabPlatform)
             {
                 hideIndicator = true;
             }
@@ -135,7 +133,7 @@ public class SketchBranchView : MonoBehaviour
                     lineRendererIndicator.SetPosition(0, sketchedBranches[selectedNode.letter].GetPosition(sketchedBranches[selectedNode.letter].positionCount - 1));
                 }
 
-                lineRendererIndicator.SetPosition(1, rightController.transform.position - sketchedBranches[selectedNode.letter].gameObject.transform.position);
+                lineRendererIndicator.SetPosition(1, inputController.activeController.transform.position - sketchedBranches[selectedNode.letter].gameObject.transform.position);
             }
             else
             {
@@ -166,9 +164,9 @@ public class SketchBranchView : MonoBehaviour
         {
             if (inputController.activateTutorial)
             {
-                if (tutorialController.tutorialState == TutorialPoint.AddTrunk)
+                if (inputController.tutorialController.tutorialState == TutorialPoint.AddTrunk)
                 {
-                    tutorialController.AdvanceTutorial();
+                    inputController.tutorialController.AdvanceTutorial();
                 }
             }
 
@@ -183,9 +181,9 @@ public class SketchBranchView : MonoBehaviour
             }
             if (inputController.activateTutorial)
             {
-                if (tutorialController.tutorialState == TutorialPoint.AddBranch)
+                if (inputController.tutorialController.tutorialState == TutorialPoint.AddBranch)
                 {
-                    tutorialController.AdvanceTutorial();
+                    inputController.tutorialController.AdvanceTutorial();
                 }
             }
 
@@ -200,14 +198,14 @@ public class SketchBranchView : MonoBehaviour
         selectedNode.index++;
 
         sketchedBranches[selectedNode.letter].positionCount++;
-        sketchedBranches[selectedNode.letter].SetPosition(sketchedBranches[selectedNode.letter].positionCount - 1, rightController.transform.position - sketchedBranches[selectedNode.letter].gameObject.transform.position);
+        sketchedBranches[selectedNode.letter].SetPosition(sketchedBranches[selectedNode.letter].positionCount - 1, inputController.activeController.transform.position - sketchedBranches[selectedNode.letter].gameObject.transform.position);
         InstantiateNode();
 
 
     }
     void InstantiateNode()
     {
-        GameObject interactableNode = Instantiate(interactableNodePrefab, rightController.transform.position, Quaternion.identity);
+        GameObject interactableNode = Instantiate(interactableNodePrefab, inputController.activeController.transform.position, Quaternion.identity);
         interactableNode.transform.parent = sketchedBranches[selectedNode.letter].transform;
         SketchedNodeModel nodeModel = interactableNode.GetComponent<SketchedNodeModel>();
         nodeModel.Index(selectedNode.index);
@@ -256,9 +254,9 @@ public class SketchBranchView : MonoBehaviour
     {
         if (inputController.activateTutorial)
         {
-            if (tutorialController.tutorialState == TutorialPoint.MoveSection)
+            if (inputController.tutorialController.tutorialState == TutorialPoint.MoveSection)
             {
-                tutorialController.AdvanceTutorial();
+                inputController.tutorialController.AdvanceTutorial();
             }
         }
 
@@ -277,9 +275,9 @@ public class SketchBranchView : MonoBehaviour
         SetSelectedNode(sketchedNodeModel);
         if (inputController.activateTutorial)
         {
-            if (tutorialController.tutorialState == TutorialPoint.DeleteSection)
+            if (inputController.tutorialController.tutorialState == TutorialPoint.DeleteSection)
             {
-                tutorialController.AdvanceTutorial();
+                inputController.tutorialController.AdvanceTutorial();
             }
         }
         Debug.Log("Trying to destroy node "+ sketchedNodeModel.Letter()+sketchedNodeModel.Index());

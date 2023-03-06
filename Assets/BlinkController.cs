@@ -42,4 +42,5 @@ public class BlinkController : MonoBehaviour
             return blinkMat;
         });
     }
+
 }

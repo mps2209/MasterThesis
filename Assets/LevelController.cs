@@ -4,6 +4,8 @@ using UnityEngine;
 
 public static class LevelController
 {
+    public static Language language= Language.English;
+
     public static bool loadForest = true;
     public static bool skipTutorial = false;
 
@@ -29,4 +31,8 @@ public static class LevelController
 
         }
     }
+}
+public enum Language
+{
+    English, Deutsch
 }
