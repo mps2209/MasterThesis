@@ -6,9 +6,9 @@ in
 Media and Human Centered Computing
 by Maximilian Steiner MatrNr. 1041121
 
-Structure of repository:
-User Study
-    Hosts all information Related to the user study done during this master thesis
-Code
-    Hosts the code of the unity prototype developed for this master thesis.
+## Structure of repository:
+- User Study
+-- Hosts all information Related to the user study done during this master thesis
+- Code
+-- Hosts the code of the unity prototype developed for this master thesis.
     
